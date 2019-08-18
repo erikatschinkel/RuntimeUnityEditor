@@ -33,14 +33,15 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BepInEx">
-      <HintPath>..\Libs\v4\BepInEx.dll</HintPath>
+    <Reference Include="BepInEx, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libraries\BepInEx\BepInExLegacy\BepInEx.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\Libs\v4\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libraries\Unity\unity-2017.1\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

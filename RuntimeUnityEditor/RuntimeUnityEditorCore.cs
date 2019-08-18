@@ -2,6 +2,7 @@
 using RuntimeUnityEditor.Core.Gizmos;
 using RuntimeUnityEditor.Core.ObjectTree;
 using RuntimeUnityEditor.Core.REPL;
+using RuntimeUnityEditor.Core.Networking;
 using UnityEngine;
 
 namespace RuntimeUnityEditor.Core
@@ -14,6 +15,7 @@ namespace RuntimeUnityEditor.Core
         public Inspector.Inspector Inspector { get; }
         public ObjectTreeViewer TreeViewer { get; }
         public ReplWindow Repl { get; }
+        public TCPServer _tcpServer = new TCPServer();
 
         public KeyCode ShowHotkey { get; set; } = KeyCode.F12;
 
@@ -34,6 +36,9 @@ namespace RuntimeUnityEditor.Core
             PluginObject = pluginObject;
             Logger = logger;
             Instance = this;
+
+            if (!_tcpServer.isRunning)
+                _tcpServer.Start();
 
             Inspector = new Inspector.Inspector(targetTransform => TreeViewer.SelectAndShowObject(targetTransform));
 
