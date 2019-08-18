@@ -20,4 +20,6 @@ In-game inspector, editor and interactive console for applications made with Uni
 
 Note: If the plugin fails to load under BepInEx 4 with a type load exception, move RuntimeUnityEditor.Core.dll to BepInEx/core folder.
 
+### Telnet Server is hosted at 127.0.0.1:1755
+
 You can support development of my plugins through my Patreon page: https://www.patreon.com/ManlyMarco
