@@ -268,6 +268,7 @@ namespace RuntimeUnityEditor.Core.Networking
 
     }
 
+    //Genric class to dump an object to string block
     public static class ObjectExtensions
     {
         /// <summary>

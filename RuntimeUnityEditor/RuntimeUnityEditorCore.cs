@@ -3,13 +3,14 @@ using RuntimeUnityEditor.Core.Gizmos;
 using RuntimeUnityEditor.Core.ObjectTree;
 using RuntimeUnityEditor.Core.REPL;
 using RuntimeUnityEditor.Core.Networking;
+using RuntimeUnityEditor.Core.Networking.IPCServer;
 using UnityEngine;
 
 namespace RuntimeUnityEditor.Core
 {
     public class RuntimeUnityEditorCore
     {
-        public const string Version = "1.5";
+        public const string Version = "1.5.0.1";
         public const string GUID = "RuntimeUnityEditor";
 
         public Inspector.Inspector Inspector { get; }
@@ -18,6 +19,7 @@ namespace RuntimeUnityEditor.Core
         public TCPServer _tcpServer = new TCPServer();
 
         public KeyCode ShowHotkey { get; set; } = KeyCode.F12;
+        public KeyCode IPCOnOff { get; set; } = KeyCode.F11;
 
         internal static RuntimeUnityEditorCore Instance { get; private set; }
         internal static MonoBehaviour PluginObject { get; private set; }
@@ -37,8 +39,15 @@ namespace RuntimeUnityEditor.Core
             Logger = logger;
             Instance = this;
 
+            //EDIT HERE --------------------------------------------------------------------------------------------------------------
+
             if (!_tcpServer.isRunning)
                 _tcpServer.Start();
+
+            if (!ServerUtils.isRunning)
+                ServerUtils.StartServer();
+
+            //END EDIT ---------------------------------------------------------------------------------------------------------------
 
             Inspector = new Inspector.Inspector(targetTransform => TreeViewer.SelectAndShowObject(targetTransform));
 
@@ -124,7 +133,26 @@ namespace RuntimeUnityEditor.Core
             if (Input.GetKeyDown(ShowHotkey))
                 Show = !Show;
 
+            if (Input.GetKeyDown(IPCOnOff))
+                IPCState = !IPCState;
+
             Inspector.InspectorUpdate();
+        }
+
+        public bool IPCState
+        {
+            get => ServerUtils.isRunning;
+            set
+            {
+                if(value)
+                {
+                    ServerUtils.StartServer();
+                }
+                else
+                {
+                    ServerUtils.StopServer();
+                }
+            }
         }
 
         private void SetWindowSizes()

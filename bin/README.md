@@ -7,6 +7,8 @@ In-game inspector, editor and interactive console for applications made with Uni
 - Object inspector that allows modifying values of objects in real time
 - REPL C# console
 - All parts are integrated together (e.g. REPL console can access inspected object, inspector can focus objects on GameObject list, etc.)
+- Telnet Server (Functional Foundation WIP - basic features)
+- IPC Named Pipes Server (Functional Foudation WIP - basic features)
 
 ![preview](https://user-images.githubusercontent.com/39247311/53586063-a8324000-3b87-11e9-8209-57e660d2949d.png)
 ![preview](https://user-images.githubusercontent.com/39247311/49837301-2d3a6400-fda6-11e8-961a-9a85f1247705.PNG)
@@ -20,4 +22,6 @@ In-game inspector, editor and interactive console for applications made with Uni
 
 Note: If the plugin fails to load under BepInEx 4 with a type load exception, move RuntimeUnityEditor.Core.dll to BepInEx/core folder.
 
-You can support development of my plugins through my Patreon page: https://www.patreon.com/ManlyMarco
+### Telnet Server is hosted at 127.0.0.1:1755
+
+### IPC Server Endpoint: "\\.\pipe\RUEPipe"

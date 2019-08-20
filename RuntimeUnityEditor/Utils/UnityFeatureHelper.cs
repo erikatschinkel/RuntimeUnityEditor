@@ -34,6 +34,7 @@ namespace RuntimeUnityEditor.Core.Utils
             SupportsVectrosity = _vectrosity != null;
             if (!SupportsVectrosity)
                 RuntimeUnityEditorCore.Logger.Log(LogLevel.Warning, "[RuntimeEditor] Vectrosity.dll is not available, drawing gizmos will be disabled");
+
         }
         
         public static bool SupportsScenes { get; private set; }
