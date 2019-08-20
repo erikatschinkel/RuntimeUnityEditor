@@ -30,7 +30,7 @@ namespace NamedPipeTestClient
                 }
                 else
                 {
-                    SystemIONamedPipeClient.Run();
+                    SystemIONamedPipeClient.SendObject();
                 }
             }
         }

@@ -125,6 +125,117 @@ namespace NamedPipeTestClient
             }
         }
 
+        public static void SendObject()
+        {
+            SafePipeHandle hNamedPipe = null;
+
+            try
+            {
+                // ----------------------------------------------------------------------------------------------------------------
+                // Try to open the named pipe identified by the pipe name.
+                while (true)
+                {
+                    hNamedPipe = NativeMethod.CreateFile(
+                        Program.FullPipeName,                   // Pipe name
+                        FileDesiredAccess.GENERIC_READ |        // Read access
+                        FileDesiredAccess.GENERIC_WRITE,        // Write access
+                        FileShareMode.Zero,                     // No sharing 
+                        null,                                   // Default security attributes
+                        FileCreationDisposition.OPEN_EXISTING,  // Opens existing pipe
+                        0,                                      // Default attributes
+                        IntPtr.Zero                             // No template file
+                        );
+
+                    // If the pipe handle is opened successfully.
+                    if (!hNamedPipe.IsInvalid)
+                    {
+                        Console.WriteLine("[IPC Client Connected] Named Pipe: \"{0}\"", Program.FullPipeName);
+                        break;
+                    }
+
+                    // Exit if an error other than ERROR_PIPE_BUSY occurs.
+                    if (Marshal.GetLastWin32Error() != ERROR_PIPE_BUSY)
+                    {
+                        throw new Win32Exception();
+                    }
+
+                    // All pipe instances are busy, so wait for 5 seconds.
+                    if (!NativeMethod.WaitNamedPipe(Program.FullPipeName, 5000))
+                    {
+                        throw new Win32Exception();
+                    }
+                }
+
+                // ----------------------------------------------------------------------------------------------------------------
+                // Set the read mode and the blocking mode of the named pipe
+                PipeMode mode = PipeMode.PIPE_READMODE_MESSAGE;
+                if (!NativeMethod.SetNamedPipeHandleState(hNamedPipe, ref mode, IntPtr.Zero, IntPtr.Zero))
+                {
+                    throw new Win32Exception();
+                }
+
+                // ----------------------------------------------------------------------------------------------------------------
+                // Send data to server.
+                string message = Program.RequestMessage;
+                byte[] bRequest = Encoding.UTF8.GetBytes(message);
+                int cbRequest = bRequest.Length, cbWritten;
+
+                if (!NativeMethod.WriteFile(
+                    hNamedPipe,                 // Handle of the pipe
+                    bRequest,                   // Message to be written
+                    cbRequest,                  // Number of bytes to write
+                    out cbWritten,              // Number of bytes written
+                    IntPtr.Zero                 // Not overlapped
+                    ))
+                {
+                    throw new Win32Exception();
+                }
+
+                Console.WriteLine("[IPC Client Sent {0} bytes] Message - {1}", cbWritten, message.Replace("\0", ""));
+
+                // ----------------------------------------------------------------------------------------------------------------
+                // Receive response from server.
+                bool finishRead = false;
+                do
+                {
+                    byte[] bResponse = new byte[Program.BufferSize];
+                    int cbResponse = bResponse.Length, cbRead;
+
+                    finishRead = NativeMethod.ReadFile(
+                        hNamedPipe,             // Handle of the pipe
+                        bResponse,              // Buffer to receive data
+                        cbResponse,             // Size of buffer in bytes
+                        out cbRead,             // Number of bytes read 
+                        IntPtr.Zero             // Not overlapped 
+                        );
+
+                    if (!finishRead && Marshal.GetLastWin32Error() != ERROR_MORE_DATA)
+                    {
+                        throw new Win32Exception();
+                    }
+
+                    // ----------------------------------------------------------------------------------------------------------------
+                    // UTF8-encode the received byte array and trim all the '\0' characters at the end.
+                    message = Encoding.UTF8.GetString(bResponse).Replace("\0", "");
+                    Console.WriteLine("[IPC Client Received {0} bytes] Message - {1}", cbRead, message);
+                }
+                while (!finishRead);  // Repeat loop if ERROR_MORE_DATA
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[IPC Client ERROR] - {0}", ex.Message);
+            }
+            finally
+            {
+                if (hNamedPipe != null)
+                {
+                    hNamedPipe.Close();
+                    hNamedPipe = null;
+                }
+            }
+        }
+
         #region Native API Signatures and Types
 
         /// <summary>

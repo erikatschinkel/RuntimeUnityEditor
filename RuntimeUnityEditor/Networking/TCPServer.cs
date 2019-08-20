@@ -276,7 +276,7 @@ namespace RuntimeUnityEditor.Core.Networking
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="writer"></param>
-        public static string Dump(this object obj, int indentsize = 0)
+        public static string QuickDump(this object obj, int indentsize = 0)
         {
             string strOut = "";
             string indent = "";

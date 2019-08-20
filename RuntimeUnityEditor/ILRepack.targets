@@ -6,6 +6,7 @@
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)\$(AssemblyName)1.dll" />
       <InputAssemblies Include="$(OutputPath)\mcs_custom.dll" />
+      <InputAssemblies Include="$(OutputPath)\Newtonsoft.Json.dll" />
     </ItemGroup>
 
     <ILRepack

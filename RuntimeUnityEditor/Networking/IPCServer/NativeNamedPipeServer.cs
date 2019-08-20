@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Security;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
+using Newtonsoft.Json;
 
 namespace RuntimeUnityEditor.Core.Networking.IPCServer
 {
@@ -20,113 +21,128 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         /// </summary> 
         public static void Run()
         {
-            // ----------------------------------------------------------------------------------------------------------------
-            // Create the named pipe. 
-            using (SafePipeHandle hNamedPipe = NativeMethod.CreateNamedPipe(
-                ServerUtils.FullPipeName,           // The unique pipe name. 
-                PipeOpenMode.PIPE_ACCESS_DUPLEX,    // The pipe is duplex 
-                PipeMode.PIPE_TYPE_MESSAGE |        // Message type pipe  
-                PipeMode.PIPE_READMODE_MESSAGE |    // Message-read mode  
-                PipeMode.PIPE_WAIT,                 // Blocking mode is on 
-                2,                                  // Max server instances 
-                ServerUtils.BufferSize,             // Output buffer size 
-                ServerUtils.BufferSize,             // Input buffer size 
-                NMPWAIT_USE_DEFAULT_WAIT            // Time-out interval
-                ))
+            while (!KillServerRequested)
             {
-                try
+                // ----------------------------------------------------------------------------------------------------------------
+                // Create the named pipe. 
+                using (SafePipeHandle hNamedPipe = NativeMethod.CreateNamedPipe(
+                    ServerUtils.FullPipeName,           // The unique pipe name. 
+                    PipeOpenMode.PIPE_ACCESS_DUPLEX,    // The pipe is duplex 
+                    PipeMode.PIPE_TYPE_MESSAGE |        // Message type pipe  
+                    PipeMode.PIPE_READMODE_MESSAGE |    // Message-read mode  
+                    PipeMode.PIPE_WAIT,                 // Blocking mode is on 
+                    2,                                  // Max server instances 
+                    ServerUtils.BufferSize,             // Output buffer size 
+                    ServerUtils.BufferSize,             // Input buffer size 
+                    NMPWAIT_USE_DEFAULT_WAIT            // Time-out interval
+                    ))
                 {
-                    if (hNamedPipe.IsInvalid)
+                    try
                     {
-                        throw new Win32Exception();
-                    }
-
-                    Console.WriteLine("[IPC Server Waiting for Connection] - \"{0}\"", ServerUtils.FullPipeName);
-
-                    // ----------------------------------------------------------------------------------------------------------------
-                    // Wait for the connections. Runs on background thread. Non-blocking 
-                    if (!NativeMethod.ConnectNamedPipe(hNamedPipe, IntPtr.Zero))
-                    {
-                        if (Marshal.GetLastWin32Error() != ERROR_PIPE_CONNECTED)
-                        {
-                            throw new Win32Exception();
-                        }
-                    }
-                    Console.WriteLine("[IPC Server Status] - Client Connected");
-
-                    // ---------------------------------------------------------------------------------------------------------------- 
-                    // Received a request from client.
-                    string message;
-                    bool finishRead = false;
-                    do
-                    {
-                        byte[] bRequest = new byte[ServerUtils.BufferSize];
-                        int cbRequest = bRequest.Length, cbRead;
-
-                        finishRead = NativeMethod.ReadFile(
-                            hNamedPipe,             // Handle of the pipe 
-                            bRequest,               // Buffer to receive data 
-                            cbRequest,              // Size of buffer in bytes 
-                            out cbRead,             // Number of bytes read  
-                            IntPtr.Zero             // Not overlapped  
-                            );
-
-                        if (!finishRead && Marshal.GetLastWin32Error() != ERROR_MORE_DATA)
+                        if (hNamedPipe.IsInvalid)
                         {
                             throw new Win32Exception();
                         }
 
-                        // UTF8-encode the received byte array and trim all the '\0' characters at the end. 
-                        message = Encoding.UTF8.GetString(bRequest).Replace("\0", "");
-                        Console.WriteLine("[IPC Server Received {0} bytes] Message: {1}", cbRead, message);
-                    }
-                    while (!finishRead); // Repeat loop if ERROR_MORE_DATA 
+                        Console.WriteLine("[IPC Server Waiting for Connection] - \"{0}\"", ServerUtils.FullPipeName);
 
-                    if (message == "DISCONNECT_REQUEST") { goto EXITLOOP; }
-                    if (message == "KILL_SERVER") { KillServerRequested = true; goto EXITLOOP; }
+                        // ----------------------------------------------------------------------------------------------------------------
+                        // Wait for the connections. Runs on background thread. Non-blocking 
+                        if (!NativeMethod.ConnectNamedPipe(hNamedPipe, IntPtr.Zero))
+                        {
+                            if (Marshal.GetLastWin32Error() != ERROR_PIPE_CONNECTED)
+                            {
+                                throw new Win32Exception();
+                            }
+                        }
+                        Console.WriteLine("[IPC Server Status] - Client Connected");
+
+                        // ---------------------------------------------------------------------------------------------------------------- 
+                        // Received a request from client.
+                        string message;
+                        bool finishRead = false;
+                        do
+                        {
+                            byte[] bRequest = new byte[ServerUtils.BufferSize];
+                            int cbRequest = bRequest.Length, cbRead;
+
+                            finishRead = NativeMethod.ReadFile(
+                                hNamedPipe,             // Handle of the pipe 
+                                bRequest,               // Buffer to receive data 
+                                cbRequest,              // Size of buffer in bytes 
+                                out cbRead,             // Number of bytes read  
+                                IntPtr.Zero             // Not overlapped  
+                                );
+
+                            if (!finishRead && Marshal.GetLastWin32Error() != ERROR_MORE_DATA)
+                            {
+                                throw new Win32Exception();
+                            }
+
+                            // UTF8-encode the received byte array and trim all the '\0' characters at the end. 
+                            message = Encoding.UTF8.GetString(bRequest).Replace("\0", "");
+                            Console.WriteLine("[IPC Server Received {0} bytes] Message: {1}\r\n", cbRead, message);
+                        }
+                        while (!finishRead); // Repeat loop if ERROR_MORE_DATA 
+
+                        // If message is not KILL_SERVER, then process client request
+                        if (message != "KILL_SERVER")
+                        {
+                            //Get our message header and data
+                            string[] msgArray = message.Split(new string[] { "|:|" }, StringSplitOptions.None);
+                            string header = msgArray[0];
+                            string data = msgArray[1];
+
+                            // Process Client Requests Here based off request header
+                            Console.WriteLine("    Message Header: " + header);
+                            Order order = JsonConvert.DeserializeObject<Order>(data);
+                            Console.WriteLine("    Message Data: {0} ordered {1} {2}, delivery address: {3}\r\n", order.CustomerName, order.Quantity, order.ProductName, order.Address);
+                        }
                     
-                    // ----------------------------------------------------------------------------------------------------------------
-                    // Send a message received response to client. 
-                    message = ServerUtils.ResponseMessage;
-                    byte[] bResponse = Encoding.UTF8.GetBytes(message);
-                    int cbResponse = bResponse.Length, cbWritten;
+                        // ----------------------------------------------------------------------------------------------------------------
+                        // Send a message received response to client. 
+                        string rmessage = ServerUtils.ResponseMessage;
+                        byte[] bResponse = Encoding.UTF8.GetBytes(rmessage);
+                        int cbResponse = bResponse.Length, cbWritten;
 
-                    if (!NativeMethod.WriteFile(
-                        hNamedPipe,                 // Handle of the pipe 
-                        bResponse,                  // Message to be written 
-                        cbResponse,                 // Number of bytes to write 
-                        out cbWritten,              // Number of bytes written 
-                        IntPtr.Zero                 // Not overlapped 
-                        ))
-                    {
-                        throw new Win32Exception();
+                        if (!NativeMethod.WriteFile(
+                            hNamedPipe,                 // Handle of the pipe 
+                            bResponse,                  // Message to be written 
+                            cbResponse,                 // Number of bytes to write 
+                            out cbWritten,              // Number of bytes written 
+                            IntPtr.Zero                 // Not overlapped 
+                            ))
+                        {
+                            throw new Win32Exception();
+                        }
+
+                        Console.WriteLine("[IPC Server Sent {0} bytes] Message: {1}", cbWritten, rmessage.Replace("\0", ""));
+
+                        if (message == "KILL_SERVER") { KillServerRequested = true; }
+
+                        // ----------------------------------------------------------------------------------------------------------------
+                        // Flush the pipe to allow the client to read the pipe's contents before disconnecting. Then disconnect the client's connection. 
+                        NativeMethod.FlushFileBuffers(hNamedPipe);
+                        NativeMethod.DisconnectNamedPipe(hNamedPipe);
                     }
-
-                    Console.WriteLine("[IPC Server Sent {0} bytes] Message: {1}", cbWritten, message.TrimEnd('\0'));
-
-                    EXITLOOP:;
-                    // ----------------------------------------------------------------------------------------------------------------
-                    // Flush the pipe to allow the client to read the pipe's contents before disconnecting. Then disconnect the client's connection. 
-                    NativeMethod.FlushFileBuffers(hNamedPipe);
-                    NativeMethod.DisconnectNamedPipe(hNamedPipe);
-
-                    if (KillServerRequested) { ServerUtils.StopServer(); }
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message != "Thread was being aborted")
+                    catch (Exception ex)
                     {
-                        Console.WriteLine("[IPC Server ERROR] - {0}", ex.Message);
+                        if (ex.Message != "Thread was being aborted")
+                        {
+                            Console.WriteLine("[IPC Server ERROR] - {0}", ex.Message);
+                        }
                     }
-                }
-                finally
-                {
-                    if (hNamedPipe != null)
+                    finally
                     {
-                        hNamedPipe.Close();
+                        if (hNamedPipe != null)
+                        {
+                            hNamedPipe.Close();
+                        }
                     }
                 }
             }
+
+            if (KillServerRequested) { ServerUtils.StopServer(); }
         }
 
 
@@ -623,6 +639,14 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         #endregion
 
         #endregion
+    }
+
+    public class Order
+    {
+        public string ProductName { get; set; }
+        public int Quantity { get; set; }
+        public string CustomerName { get; set; }
+        public string Address { get; set; }
     }
 }
 
