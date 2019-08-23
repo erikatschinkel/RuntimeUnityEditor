@@ -16,7 +16,7 @@ namespace RuntimeUnityEditor.Core.Utils
         private static readonly Type _xml = Type.GetType("System.Xml.XmlComment, System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", false);
         private static readonly Type _vectrosity = Type.GetType("Vectrosity.VectorObject2D, Vectrosity, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", false);
 
-        static UnityFeatureHelper()
+        static UnityFeatureHelperOld()
         {
             SupportsScenes = _scene != null && _sceneManager != null;
             if (!SupportsScenes)

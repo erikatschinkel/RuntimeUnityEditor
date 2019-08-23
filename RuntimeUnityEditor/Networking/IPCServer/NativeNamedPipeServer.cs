@@ -13,6 +13,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
     class NativeNamedPipeServer
     {
         private static bool KillServerRequested = false;
+        public static SafePipeHandle pipeHandle;
 
         /// <summary> 
         /// P/Invoke native APIs related to named pipe operations to create the named pipe. 
@@ -44,10 +45,11 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                             throw new Win32Exception();
                         }
 
+                        pipeHandle = hNamedPipe;
                         Console.WriteLine("[IPC Server Waiting for Connection] - \"{0}\"", ServerUtils.FullPipeName);
 
                         // ----------------------------------------------------------------------------------------------------------------
-                        // Wait for the connections. Runs on background thread. Non-blocking 
+                        // Wait for the connections. Runs on background thread.
                         if (!NativeMethod.ConnectNamedPipe(hNamedPipe, IntPtr.Zero))
                         {
                             if (Marshal.GetLastWin32Error() != ERROR_PIPE_CONNECTED)
@@ -131,12 +133,18 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                         {
                             Console.WriteLine("[IPC Server ERROR] - {0}", ex.Message);
                         }
+
+                        hNamedPipe.Close();
+                        hNamedPipe.Dispose();
+                        NativeMethod.DisconnectNamedPipe(hNamedPipe);
                     }
                     finally
                     {
                         if (hNamedPipe != null)
                         {
                             hNamedPipe.Close();
+                            hNamedPipe.Dispose();
+                            NativeMethod.DisconnectNamedPipe(hNamedPipe);
                         }
                     }
                 }
@@ -388,6 +396,46 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         [SuppressUnmanagedCodeSecurity]
         internal class NativeMethod
         {
+            ///-------------------------------------------------------------------------------------------------
+            /// <summary>   Suspend thread. </summary>
+            /// <param name="hThread">  The thread. </param>
+            ///
+            /// <returns>   An int. </returns>
+            ///-------------------------------------------------------------------------------------------------
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern int SuspendThread(IntPtr hThread);
+
+            ///-------------------------------------------------------------------------------------------------
+            /// <summary>   Opens a thread. </summary>
+            /// <param name="dwDesiredAccess">  The desired access. </param>
+            /// <param name="bInheritHandle">   True to inherit handle. </param>
+            /// <param name="dwThreadId">       Identifier for the thread. </param>
+            ///
+            /// <returns>   An IntPtr. </returns>
+            ///-------------------------------------------------------------------------------------------------
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr OpenThread(uint dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+
+            ///-------------------------------------------------------------------------------------------------
+            /// <summary>   Closes a handle. </summary>
+            /// <param name="hObject">  The object. </param>
+            ///
+            /// <returns>   True if it succeeds, false if it fails. </returns>
+            ///-------------------------------------------------------------------------------------------------
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CloseHandle(IntPtr hObject);
+
+            ///-------------------------------------------------------------------------------------------------
+            /// <summary>   Terminate thread. </summary>
+            /// <param name="hThread">      The thread. </param>
+            /// <param name="dwExitCode">   The exit code. </param>
+            ///
+            /// <returns>   True if it succeeds, false if it fails. </returns>
+            ///-------------------------------------------------------------------------------------------------
+            [DllImport("kernel32.dll")]
+            public static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+
             /// <summary> 
             /// Creates an instance of a named pipe and returns a handle for subsequent pipe operations. 
             /// </summary> 
@@ -480,8 +528,33 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
             /// <returns>If the function succeeds, the return value is true.</returns> 
             [return: MarshalAs(UnmanagedType.Bool)]
             [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            public static extern bool SetNamedPipeHandleState(SafePipeHandle hNamedPipe, ref PipeMode mode, IntPtr maxCollectionCount, IntPtr collectDataTimeout);
+            public static extern bool SetNamedPipeHandleState(SafePipeHandle hNamedPipe, PipeMode mode, IntPtr maxCollectionCount, IntPtr collectDataTimeout);
 
+            /// <summary> 
+            /// Sets the read mode and the blocking mode of the specified named pipe. 
+            /// </summary> 
+            /// <remarks> 
+            /// If the specified handle is to the client end of a named pipe and if 
+            /// the named pipe server process is on a remote computer, the function 
+            /// can also be used to control local buffering. 
+            /// </remarks> 
+            /// <param name="hNamedPipe">Handle to the named pipe instance.</param> 
+            /// <param name="mode"> 
+            /// Pointer to a variable that supplies the new mode. 
+            /// </param> 
+            /// <param name="maxCollectionCount"> 
+            /// Reference to a variable that specifies the maximum number of bytes  
+            /// collected on the client computer before transmission to the server. 
+            /// </param> 
+            /// <param name="collectDataTimeout"> 
+            /// Reference to a variable that specifies the maximum time, in  
+            /// milliseconds, that can pass before a remote named pipe transfers  
+            /// information over the network. 
+            /// </param> 
+            /// <returns>If the function succeeds, the return value is true.</returns> 
+            [return: MarshalAs(UnmanagedType.Bool)]
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern bool SetNamedPipeHandleState(SafePipeHandle hNamedPipe, ref PipeMode mode, IntPtr maxCollectionCount, IntPtr collectDataTimeout);
 
             /// <summary> 
             /// Creates or opens a file, directory, physical disk, volume, console  
@@ -641,6 +714,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         #endregion
     }
 
+    // Test Data Object - Used for testing IPC Server
     public class Order
     {
         public string ProductName { get; set; }

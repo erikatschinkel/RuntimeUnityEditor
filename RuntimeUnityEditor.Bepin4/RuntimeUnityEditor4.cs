@@ -13,6 +13,10 @@ namespace RuntimeUnityEditor.Bepin4
             "When correctly configured, you will see a new ^ buttons that will open the members in dnSpy.")]
         public ConfigWrapper<string> DnSpyPath { get; private set; }
 
+        //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+        public ConfigWrapper<string> EnableDebug { get; set; }
+        //END EDIT ---------------------------------------------------------------------------------------------------------------
+        
         public static RuntimeUnityEditorCore Instance { get; set; }
 
         private void OnGUI()
@@ -22,7 +26,12 @@ namespace RuntimeUnityEditor.Bepin4
 
         private void Start()
         {
-            Instance = new RuntimeUnityEditorCore(this, new Logger());
+            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+            EnableDebug = new ConfigWrapper<string>("enableDebugDump", "DEBUGGING", bool.FalseString);       
+            //END EDIT ---------------------------------------------------------------------------------------------------------------
+
+            Instance = new RuntimeUnityEditorCore(this, new Logger(), bool.Parse(EnableDebug.Value)); //Wh010ne Fork Edited
+
             DnSpyPath = new ConfigWrapper<string>(nameof(DnSpyPath), this);
             DnSpyPath.SettingChanged += (sender, args) => DnSpyHelper.DnSpyPath = DnSpyPath.Value;
             DnSpyHelper.DnSpyPath = DnSpyPath.Value;

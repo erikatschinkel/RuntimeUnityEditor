@@ -11,6 +11,10 @@ namespace RuntimeUnityEditor.Bepin5
     {
         public ConfigWrapper<string> DnSpyPath { get; private set; }
 
+        //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+        public ConfigWrapper<string> EnableDebug { get; private set; }
+        //END EDIT ---------------------------------------------------------------------------------------------------------------
+
         public static RuntimeUnityEditorCore Instance { get; private set; }
 
         private void OnGUI()
@@ -20,7 +24,11 @@ namespace RuntimeUnityEditor.Bepin5
 
         private void Start()
         {
-            Instance = new RuntimeUnityEditorCore(this, new Logger5(Logger));
+            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+            EnableDebug = Config.Wrap("DEBUGGING", "enableDebugDump", "Enables additional debugging checks and logging. Warning: Will delay game load time.", bool.FalseString);
+            //END EDIT ---------------------------------------------------------------------------------------------------------------
+
+            Instance = new RuntimeUnityEditorCore(this, new Logger5(Logger), bool.Parse(EnableDebug.Value)); //Wh010ne Fork Edited
 
             DnSpyPath = Config.Wrap(null, "Path to dnSpy.exe", "Full path to dnSpy that will enable integration with Inspector. When correctly configured, you will see a new ^ buttons that will open the members in dnSpy.", string.Empty);
             DnSpyPath.SettingChanged += (sender, args) => DnSpyHelper.DnSpyPath = DnSpyPath.Value;

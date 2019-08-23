@@ -37,15 +37,19 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
 
         public void OnDisable()
         {
-            Console.WriteLine("[IPC Server Starting]");
-            IPCThread.Abort();
+            Console.WriteLine("[IPC Server Shutting Down]");
+            IPCKillClient.SendKillRequest();
+            IPCThread.Interrupt();
+            if (!IPCThread.Join(200)) { IPCThread.Abort(); }
             ServerUtils.isRunning = false;
         }
 
         public static void StopServer()
         {
             Console.WriteLine("[IPC Server Shutting Down]");
-            IPCThread.Abort();
+            IPCKillClient.SendKillRequest();
+            IPCThread.Interrupt();
+            if (!IPCThread.Join(200)) { IPCThread.Abort(); }
             ServerUtils.isRunning = false;
         }
     }

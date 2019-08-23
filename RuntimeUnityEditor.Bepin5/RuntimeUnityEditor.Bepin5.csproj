@@ -45,6 +45,7 @@
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\libraries\Unity\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

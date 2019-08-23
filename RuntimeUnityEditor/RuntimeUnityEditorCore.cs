@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using RuntimeUnityEditor.Core.Gizmos;
 using RuntimeUnityEditor.Core.ObjectTree;
 using RuntimeUnityEditor.Core.REPL;
+using RuntimeUnityEditor.Core.Debugging;
 using RuntimeUnityEditor.Core.Networking;
 using RuntimeUnityEditor.Core.Networking.IPCServer;
 using UnityEngine;
@@ -16,10 +18,8 @@ namespace RuntimeUnityEditor.Core
         public Inspector.Inspector Inspector { get; }
         public ObjectTreeViewer TreeViewer { get; }
         public ReplWindow Repl { get; }
-        public TCPServer _tcpServer = new TCPServer();
-
+        
         public KeyCode ShowHotkey { get; set; } = KeyCode.F12;
-        public KeyCode IPCOnOff { get; set; } = KeyCode.F11;
 
         internal static RuntimeUnityEditorCore Instance { get; private set; }
         internal static MonoBehaviour PluginObject { get; private set; }
@@ -30,7 +30,15 @@ namespace RuntimeUnityEditor.Core
         private CursorLockMode _previousCursorLockState;
         private bool _previousCursorVisible;
 
-        public RuntimeUnityEditorCore(MonoBehaviour pluginObject, ILoggerWrapper logger)
+        //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+        public TCPServer _tcpServer = new TCPServer();
+        public static bool _enableDebug { get; set; }
+
+        public KeyCode IPCOnOff { get; set; } = KeyCode.F11;
+        public KeyCode TelnetOnOff { get; set; } = KeyCode.F10;
+        //END EDIT ---------------------------------------------------------------------------------------------------------------
+
+        public RuntimeUnityEditorCore(MonoBehaviour pluginObject, ILoggerWrapper logger, bool enableDebugDump)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Can only create one instance of the Core object");
@@ -39,13 +47,17 @@ namespace RuntimeUnityEditor.Core
             Logger = logger;
             Instance = this;
 
-            //EDIT HERE --------------------------------------------------------------------------------------------------------------
+            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+            
+            _enableDebug = enableDebugDump;
+            if (_enableDebug) { Logger.Log(LogLevel.Info, "Enabling enhanced debug logging. Load time will be affected!"); DebugHelpers.SetDebugPath(); }
 
-            if (!_tcpServer.isRunning)
-                _tcpServer.Start();
+            //Auto-start Networking Servers
+            //if (!_tcpServer.isRunning)
+                //_tcpServer.Start();
 
-            if (!ServerUtils.isRunning)
-                ServerUtils.StartServer();
+            //if (!ServerUtils.isRunning)
+                //ServerUtils.StartServer();
 
             //END EDIT ---------------------------------------------------------------------------------------------------------------
 
@@ -65,8 +77,7 @@ namespace RuntimeUnityEditor.Core
                 TreeViewer.TreeSelectionChangedCallback = transform => GizmoDrawer.UpdateState(transform);
             }
 
-            if (Utils.UnityFeatureHelper.SupportsCursorIndex &&
-                Utils.UnityFeatureHelper.SupportsXml)
+            if (Utils.UnityFeatureHelper.SupportsCursorIndex && Utils.UnityFeatureHelper.SupportsXml)
             {
                 try
                 {
@@ -133,26 +144,15 @@ namespace RuntimeUnityEditor.Core
             if (Input.GetKeyDown(ShowHotkey))
                 Show = !Show;
 
+            //Wh010ne Fork -----------------------------------
             if (Input.GetKeyDown(IPCOnOff))
                 IPCState = !IPCState;
 
-            Inspector.InspectorUpdate();
-        }
+            if (Input.GetKeyDown(TelnetOnOff))
+                TelnetState = !TelnetState;
+            //END EDIT ---------------------------------------
 
-        public bool IPCState
-        {
-            get => ServerUtils.isRunning;
-            set
-            {
-                if(value)
-                {
-                    ServerUtils.StartServer();
-                }
-                else
-                {
-                    ServerUtils.StopServer();
-                }
-            }
+            Inspector.InspectorUpdate();
         }
 
         private void SetWindowSizes()
@@ -190,5 +190,41 @@ namespace RuntimeUnityEditor.Core
                 centerWidth,
                 screenRect.height - inspectorHeight - replPadding));
         }
+
+        //Wh010ne Fork --------------------------------------------------------------------------------------------------------------------
+        
+        public bool TelnetState
+        {
+            get => _tcpServer.isRunning;
+            set
+            {
+                if (value)
+                {
+                    _tcpServer.StartTCPServer();
+                }
+                else
+                {
+                    _tcpServer.StopTCPServer();
+                }
+            }
+        }
+
+        public bool IPCState
+        {
+            get => ServerUtils.isRunning;
+            set
+            {
+                if(value)
+                {
+                    ServerUtils.StartServer();
+                }
+                else
+                {
+                    ServerUtils.StopServer();
+                }
+            }
+        }
+
+        //END EDIT ------------------------------------------------------------------------------------------------------------------------
     }
 }

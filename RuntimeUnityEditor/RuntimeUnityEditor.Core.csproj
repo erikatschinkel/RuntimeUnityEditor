@@ -26,6 +26,8 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>
     </CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>CS0414,CS0169</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
@@ -37,6 +39,7 @@
     <CodeAnalysisRuleSet>
     </CodeAnalysisRuleSet>
     <DebugSymbols>true</DebugSymbols>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mcs_custom">
@@ -63,6 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Debugging\DebugHelpers.cs" />
     <Compile Include="DnSpyHelper.cs" />
     <Compile Include="Gizmos\IGizmoEntry.cs" />
     <Compile Include="Gizmos\RendererGizmo.cs" />
@@ -75,6 +79,7 @@
     <Compile Include="Inspector\Entries\Contents\CacheEntryBase.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="Gizmos\GizmoDrawer.cs" />
+    <Compile Include="Networking\IPCServer\IPCKillClient.cs" />
     <Compile Include="Networking\IPCServer\NativeNamedPipeServer.cs" />
     <Compile Include="Networking\IPCServer\ServerUtils.cs" />
     <Compile Include="Networking\TCPServer.cs" />
@@ -101,7 +106,7 @@
     <Compile Include="Inspector\Entries\Contents\ReadonlyCacheEntry.cs" />
     <Compile Include="Utils\SceneDumper.cs" />
     <Compile Include="Utils\TypeNameExtensions.cs" />
-    <Compile Include="Utils\UnityFeatureHelper.cs" />
+    <Compile Include="Utils\UnityFeatureHelperNew.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">

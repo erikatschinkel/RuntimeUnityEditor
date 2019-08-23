@@ -43,16 +43,14 @@ namespace RuntimeUnityEditor.Core.Networking
 
         public void OnGUI()
         {
-            //GUI.color = Color.red;
+            //Display in-game notification status
             //GUI.Label(new Rect(725, 70, 350, 100), _message);
         }
 
         public void Start()
         {
-            // Required if you don't want the server slowing down the main thread.
-            Application.runInBackground = true;
-
-            StartTCPServer();
+            //Auto-start on load
+            //StartTCPServer();
         }
 
         public void OnDisable()
@@ -88,8 +86,11 @@ namespace RuntimeUnityEditor.Core.Networking
             }
         }
 
-        private void StartTCPServer()
+        public void StartTCPServer()
         {
+            // Required if you don't want the server slowing down the main thread.
+            Application.runInBackground = true;
+
             SocketThread = new System.Threading.Thread(SocketConnection);
             SocketThread.IsBackground = true;
             SocketThread.Start();
@@ -97,7 +98,7 @@ namespace RuntimeUnityEditor.Core.Networking
             this.isRunning = true;
         }
 
-        private void StopTCPServer()
+        public void StopTCPServer()
         {
             keepReading = false;
 
