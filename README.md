@@ -30,3 +30,7 @@ Note: If the plugin fails to load under BepInEx 4 with a type load exception, mo
 ### Telnet Server is hosted at 127.0.0.1:1755
 
 ### IPC Server Endpoint: "\\.\pipe\RUEPipe"
+
+### Credits:
+Special thanks to ManlyMarco for his hard work in developing the original project this fork is based on. You can still support his work
+through his Patreon page at: https://www.patreon.com/ManlyMarco

@@ -4,7 +4,7 @@ using RuntimeUnityEditor.Core.Gizmos;
 using RuntimeUnityEditor.Core.ObjectTree;
 using RuntimeUnityEditor.Core.REPL;
 using RuntimeUnityEditor.Core.Debugging;
-using RuntimeUnityEditor.Core.Networking;
+using RuntimeUnityEditor.Core.Networking.TCPServer;
 using RuntimeUnityEditor.Core.Networking.IPCServer;
 using UnityEngine;
 
@@ -12,6 +12,8 @@ namespace RuntimeUnityEditor.Core
 {
     public class RuntimeUnityEditorCore
     {
+        #region[Declarations]
+
         public const string Version = "1.5.0.1";
         public const string GUID = "RuntimeUnityEditor";
 
@@ -30,13 +32,16 @@ namespace RuntimeUnityEditor.Core
         private CursorLockMode _previousCursorLockState;
         private bool _previousCursorVisible;
 
-        //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
-        public TCPServer _tcpServer = new TCPServer();
+        // Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+        private TelnetServer _tcpServer = new TelnetServer();
+        private IPCServer _ipcServer = new IPCServer();
         public static bool _enableDebug { get; set; }
 
         public KeyCode IPCOnOff { get; set; } = KeyCode.F11;
         public KeyCode TelnetOnOff { get; set; } = KeyCode.F10;
-        //END EDIT ---------------------------------------------------------------------------------------------------------------
+        // END EDIT ---------------------------------------------------------------------------------------------------------------
+
+        #endregion
 
         public RuntimeUnityEditorCore(MonoBehaviour pluginObject, ILoggerWrapper logger, bool enableDebugDump)
         {
@@ -47,18 +52,9 @@ namespace RuntimeUnityEditor.Core
             Logger = logger;
             Instance = this;
 
-            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
-            
+            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------           
             _enableDebug = enableDebugDump;
             if (_enableDebug) { Logger.Log(LogLevel.Info, "Enabling enhanced debug logging. Load time will be affected!"); DebugHelpers.SetDebugPath(); }
-
-            //Auto-start Networking Servers
-            //if (!_tcpServer.isRunning)
-                //_tcpServer.Start();
-
-            //if (!ServerUtils.isRunning)
-                //ServerUtils.StartServer();
-
             //END EDIT ---------------------------------------------------------------------------------------------------------------
 
             Inspector = new Inspector.Inspector(targetTransform => TreeViewer.SelectAndShowObject(targetTransform));
@@ -90,6 +86,8 @@ namespace RuntimeUnityEditor.Core
             }
         }
 
+        #region[Unity Workflow]
+
         public void OnGUI()
         {
             if (Show)
@@ -102,6 +100,26 @@ namespace RuntimeUnityEditor.Core
                 Repl?.DisplayWindow();
             }
         }
+
+        public void Update()
+        {
+            if (Input.GetKeyDown(ShowHotkey))
+                Show = !Show;
+
+            //Wh010ne Fork -----------------------------------
+            if (Input.GetKeyDown(IPCOnOff))
+                IPCState = !IPCState;
+
+            if (Input.GetKeyDown(TelnetOnOff))
+                TelnetState = !TelnetState;
+            //END EDIT ---------------------------------------
+
+            Inspector.InspectorUpdate();
+        }
+
+        #endregion
+
+        #region[Accessors/States]
 
         public bool Show
         {
@@ -139,21 +157,43 @@ namespace RuntimeUnityEditor.Core
             }
         }
 
-        public void Update()
+        // Wh010ne Fork --------------------------------------------------------------------------------------------------------------------        
+        public bool TelnetState
         {
-            if (Input.GetKeyDown(ShowHotkey))
-                Show = !Show;
-
-            //Wh010ne Fork -----------------------------------
-            if (Input.GetKeyDown(IPCOnOff))
-                IPCState = !IPCState;
-
-            if (Input.GetKeyDown(TelnetOnOff))
-                TelnetState = !TelnetState;
-            //END EDIT ---------------------------------------
-
-            Inspector.InspectorUpdate();
+            get => _tcpServer.isRunning;
+            set
+            {
+                if (value)
+                {
+                    _tcpServer.Start();
+                }
+                else
+                {
+                    _tcpServer.StopTCPServer();
+                }
+            }
         }
+
+        public bool IPCState
+        {
+            get => _ipcServer.isRunning;
+            set
+            {
+                if(value)
+                {
+                    _ipcServer.StartServer();
+                }
+                else
+                {
+                    _ipcServer.StopServer();
+                }
+            }
+        }
+        // END EDIT ------------------------------------------------------------------------------------------------------------------------
+
+        #endregion
+
+        #region[Helpers]
 
         private void SetWindowSizes()
         {
@@ -186,45 +226,11 @@ namespace RuntimeUnityEditor.Core
             var replPadding = 8;
             Repl?.UpdateWindowSize(new Rect(
                 centerX,
-                screenRect.yMin + inspectorHeight + replPadding,
+                screenRect.yMin + replPadding, //inspectorHeight + replPadding,
                 centerWidth,
-                screenRect.height - inspectorHeight - replPadding));
+                screenRect.height - replPadding)); //inspectorHeight / 2 - replPadding));
         }
 
-        //Wh010ne Fork --------------------------------------------------------------------------------------------------------------------
-        
-        public bool TelnetState
-        {
-            get => _tcpServer.isRunning;
-            set
-            {
-                if (value)
-                {
-                    _tcpServer.StartTCPServer();
-                }
-                else
-                {
-                    _tcpServer.StopTCPServer();
-                }
-            }
-        }
-
-        public bool IPCState
-        {
-            get => ServerUtils.isRunning;
-            set
-            {
-                if(value)
-                {
-                    ServerUtils.StartServer();
-                }
-                else
-                {
-                    ServerUtils.StopServer();
-                }
-            }
-        }
-
-        //END EDIT ------------------------------------------------------------------------------------------------------------------------
+        #endregion
     }
 }

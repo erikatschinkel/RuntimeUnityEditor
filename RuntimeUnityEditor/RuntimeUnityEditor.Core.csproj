@@ -81,8 +81,9 @@
     <Compile Include="Gizmos\GizmoDrawer.cs" />
     <Compile Include="Networking\IPCServer\IPCKillClient.cs" />
     <Compile Include="Networking\IPCServer\NativeNamedPipeServer.cs" />
-    <Compile Include="Networking\IPCServer\ServerUtils.cs" />
-    <Compile Include="Networking\TCPServer.cs" />
+    <Compile Include="Networking\IPCServer\IPCServer.cs" />
+    <Compile Include="Networking\TCPServer\CommandProcessor.cs" />
+    <Compile Include="Networking\TCPServer\TCPServer.cs" />
     <Compile Include="ObjectTree\ObjectTreeViewer.cs" />
     <Compile Include="REPL\MCS\ScriptEvaluator.cs" />
     <Compile Include="REPL\REPL.cs" />

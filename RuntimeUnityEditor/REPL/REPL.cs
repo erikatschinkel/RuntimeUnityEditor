@@ -42,7 +42,6 @@ namespace RuntimeUnityEditor.Core.REPL
             }
         }
 
-
         [Documentation("MB - A dummy MonoBehaviour for accessing Unity.")]
         public static ReplHelper MB { get; }
 

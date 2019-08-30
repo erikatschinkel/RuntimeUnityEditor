@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace RuntimeUnityEditor.Core.Networking.IPCServer
 {
-    public class ServerUtils : MonoBehaviour
+    public class IPCServer : MonoBehaviour
     {
+        #region[Declarations]
+
         internal const string ServerName = ".";
         internal const string PipeName = "RUEPipe";
         internal const string FullPipeName = @"\\" + ServerName + @"\pipe\" + PipeName;
@@ -14,43 +16,55 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         internal const string ResponseMessage = "MSG_RECEIVED\0";
 
         public static System.Threading.Thread IPCThread;
-        public static bool isRunning = false;
-        public ServerUtils instance;
+        public bool isRunning = false;
+        public static IPCServer instance;
 
-        public ServerUtils()
+        #endregion
+
+        #region[Constructor]
+
+        public IPCServer()
         {
-            this.instance = this;
+            instance = this;
         }
 
-        public static void StartServer()
+        #endregion
+
+        #region[Unity Workflow]
+
+        public void Start() { }
+
+        public void OnGUI()
+        {
+
+        }
+
+        public void Update() { }
+
+        public void OnDisable() { }
+
+        #endregion
+
+        public void StartServer()
         {
             Application.runInBackground = true;
 
-            if (!ServerUtils.isRunning)
+            if (!this.isRunning)
             {
                 IPCThread = new System.Threading.Thread(NativeNamedPipeServer.Run);
                 IPCThread.IsBackground = true;
                 IPCThread.Start();
-                ServerUtils.isRunning = true;
+                this.isRunning = true;
             }
         }
 
-        public void OnDisable()
+        public void StopServer()
         {
             Console.WriteLine("[IPC Server Shutting Down]");
             IPCKillClient.SendKillRequest();
             IPCThread.Interrupt();
             if (!IPCThread.Join(200)) { IPCThread.Abort(); }
-            ServerUtils.isRunning = false;
-        }
-
-        public static void StopServer()
-        {
-            Console.WriteLine("[IPC Server Shutting Down]");
-            IPCKillClient.SendKillRequest();
-            IPCThread.Interrupt();
-            if (!IPCThread.Join(200)) { IPCThread.Abort(); }
-            ServerUtils.isRunning = false;
+            this.isRunning = false;
         }
     }
 }

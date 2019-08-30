@@ -2,6 +2,8 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using RuntimeUnityEditor.Core;
+using RuntimeUnityEditor.Core.Networking.TCPServer;
+using RuntimeUnityEditor.Core.Networking.IPCServer;
 using LogLevel = RuntimeUnityEditor.Core.LogLevel;
 
 namespace RuntimeUnityEditor.Bepin5
@@ -9,36 +11,65 @@ namespace RuntimeUnityEditor.Bepin5
     [BepInPlugin(RuntimeUnityEditorCore.GUID, "Runtime Unity Editor", RuntimeUnityEditorCore.Version)]
     public class RuntimeUnityEditor5 : BaseUnityPlugin
     {
+        #region[Declarations]
+
         public ConfigWrapper<string> DnSpyPath { get; private set; }
 
-        //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
-        public ConfigWrapper<string> EnableDebug { get; private set; }
-        //END EDIT ---------------------------------------------------------------------------------------------------------------
-
         public static RuntimeUnityEditorCore Instance { get; private set; }
+
+        // Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+        public ConfigWrapper<string> EnableDebug { get; private set; }
+
+        private TelnetServer telnetServer = new TelnetServer();
+
+        private IPCServer ipcServer = new IPCServer();
+        // END EDIT ---------------------------------------------------------------------------------------------------------------
+
+        #endregion
+
+        #region[Unity Workflow]
 
         private void OnGUI()
         {
             Instance.OnGUI();
+
+            // Wh010ne Fork --------------------------------
+            telnetServer.OnGUI();
+            ipcServer.OnGUI();
+            // END EDIT ------------------------------------
         }
 
         private void Start()
         {
-            //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
+            // Wh010ne Fork -----------------------------------------------------------------------------------------------------------
             EnableDebug = Config.Wrap("DEBUGGING", "enableDebugDump", "Enables additional debugging checks and logging. Warning: Will delay game load time.", bool.FalseString);
-            //END EDIT ---------------------------------------------------------------------------------------------------------------
+            // END EDIT ---------------------------------------------------------------------------------------------------------------
 
-            Instance = new RuntimeUnityEditorCore(this, new Logger5(Logger), bool.Parse(EnableDebug.Value)); //Wh010ne Fork Edited
+            Instance = new RuntimeUnityEditorCore(this, new Logger5(Logger), bool.Parse(EnableDebug.Value)); // Wh010ne Fork Edited
 
             DnSpyPath = Config.Wrap(null, "Path to dnSpy.exe", "Full path to dnSpy that will enable integration with Inspector. When correctly configured, you will see a new ^ buttons that will open the members in dnSpy.", string.Empty);
             DnSpyPath.SettingChanged += (sender, args) => DnSpyHelper.DnSpyPath = DnSpyPath.Value;
             DnSpyHelper.DnSpyPath = DnSpyPath.Value;
+
+            // Wh010ne Fork --------------------------------
+            Instance.TelnetState = true;
+            //Instance.IPCState = true;
+            // END EDIT ------------------------------------
         }
 
         private void Update()
         {
             Instance.Update();
+
+            // Wh010ne Fork --------------------------------
+            telnetServer.Update();
+            ipcServer.Update();
+            // END EDIT ------------------------------------
         }
+
+        #endregion
+
+        #region[Logging]
 
         private sealed class Logger5 : ILoggerWrapper
         {
@@ -54,5 +85,7 @@ namespace RuntimeUnityEditor.Bepin5
                 _logger.Log((BepInEx.Logging.LogLevel) logLogLevel, content);
             }
         }
+
+        #endregion
     }
 }

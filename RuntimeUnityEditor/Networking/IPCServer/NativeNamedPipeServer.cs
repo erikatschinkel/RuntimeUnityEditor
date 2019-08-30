@@ -13,7 +13,15 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
     class NativeNamedPipeServer
     {
         private static bool KillServerRequested = false;
+
+        private static IPCServer _ipcServer;
+
         public static SafePipeHandle pipeHandle;
+
+        public NativeNamedPipeServer()
+        {
+            _ipcServer = IPCServer.instance;
+        }
 
         /// <summary> 
         /// P/Invoke native APIs related to named pipe operations to create the named pipe. 
@@ -27,14 +35,14 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                 // ----------------------------------------------------------------------------------------------------------------
                 // Create the named pipe. 
                 using (SafePipeHandle hNamedPipe = NativeMethod.CreateNamedPipe(
-                    ServerUtils.FullPipeName,           // The unique pipe name. 
+                    IPCServer.FullPipeName,           // The unique pipe name. 
                     PipeOpenMode.PIPE_ACCESS_DUPLEX,    // The pipe is duplex 
                     PipeMode.PIPE_TYPE_MESSAGE |        // Message type pipe  
                     PipeMode.PIPE_READMODE_MESSAGE |    // Message-read mode  
                     PipeMode.PIPE_WAIT,                 // Blocking mode is on 
                     2,                                  // Max server instances 
-                    ServerUtils.BufferSize,             // Output buffer size 
-                    ServerUtils.BufferSize,             // Input buffer size 
+                    IPCServer.BufferSize,             // Output buffer size 
+                    IPCServer.BufferSize,             // Input buffer size 
                     NMPWAIT_USE_DEFAULT_WAIT            // Time-out interval
                     ))
                 {
@@ -46,7 +54,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                         }
 
                         pipeHandle = hNamedPipe;
-                        Console.WriteLine("[IPC Server Waiting for Connection] - \"{0}\"", ServerUtils.FullPipeName);
+                        Console.WriteLine("[IPC Server Waiting for Connection] - \"{0}\"", IPCServer.FullPipeName);
 
                         // ----------------------------------------------------------------------------------------------------------------
                         // Wait for the connections. Runs on background thread.
@@ -65,7 +73,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                         bool finishRead = false;
                         do
                         {
-                            byte[] bRequest = new byte[ServerUtils.BufferSize];
+                            byte[] bRequest = new byte[IPCServer.BufferSize];
                             int cbRequest = bRequest.Length, cbRead;
 
                             finishRead = NativeMethod.ReadFile(
@@ -103,7 +111,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                     
                         // ----------------------------------------------------------------------------------------------------------------
                         // Send a message received response to client. 
-                        string rmessage = ServerUtils.ResponseMessage;
+                        string rmessage = IPCServer.ResponseMessage;
                         byte[] bResponse = Encoding.UTF8.GetBytes(rmessage);
                         int cbResponse = bResponse.Length, cbWritten;
 
@@ -150,7 +158,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                 }
             }
 
-            if (KillServerRequested) { ServerUtils.StopServer(); }
+            if (KillServerRequested) { _ipcServer.StopServer(); }
         }
 
 

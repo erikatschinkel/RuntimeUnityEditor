@@ -8,8 +8,7 @@ namespace RuntimeUnityEditor.Core.REPL.MCS
 {
     public class ScriptEvaluator : Evaluator, IDisposable
     {
-        private static readonly HashSet<string> StdLib =
-                new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {"mscorlib", "System.Core", "System", "System.Xml"};
+        private static readonly HashSet<string> StdLib = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) {"mscorlib", "System.Core", "System", "System.Xml"};
 
         private readonly TextWriter _logger;
 

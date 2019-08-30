@@ -11,9 +11,6 @@ namespace NamedPipeTestClient
 {
     class NativeNamedPipeClient
     {
-        /// <summary>
-        /// P/Invoke the native APIs related to named pipe operations
-        /// </summary>
         public static void Run()
         {
             SafePipeHandle hNamedPipe = null;
