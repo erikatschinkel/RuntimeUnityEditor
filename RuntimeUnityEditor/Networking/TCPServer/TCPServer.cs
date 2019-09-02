@@ -7,10 +7,6 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-//Game Specific
-//using Utilities;
-//using Client;
-//using Shared.Model;
 using UObject = UnityEngine.Object;
 
 namespace RuntimeUnityEditor.Core.Networking.TCPServer
@@ -74,11 +70,11 @@ namespace RuntimeUnityEditor.Core.Networking.TCPServer
 
         public void OnGUI()
         {
-            if (RuntimeUnityEditorCore.Instance.TelnetState) { _message = "Telnet Server Running"; } else { _message = "Telnet Server NOT Running!"; }
+            //if (RuntimeUnityEditorCore.Instance.TelnetState) { _message = "Telnet Server Running"; } else { _message = "Telnet Server NOT Running!"; }
             
             // Display in-game notification status
-            GUI.color = Color.red;
-            GUI.Label(new Rect(725, 70, 350, 100), _message);
+            //GUI.color = Color.red;
+            //GUI.Label(new Rect(725, 40, 350, 100), _message);
         }
 
         public void Update()
@@ -342,64 +338,6 @@ namespace RuntimeUnityEditor.Core.Networking.TCPServer
 
     }
 
-
-    /*
-    //ref: https://gamedev.stackexchange.com/questions/141088/how-can-i-look-up-an-object-given-only-the-name-of-its-type?rq=1
-    // References to the Unity Engine types need an assembly qualified name,
-    // so we cache that here. Repeat for any 3rd-party assemblies you use.
-    static readonly string engineAssemblyName =
-         System.Reflection.Assembly.GetAssembly(typeof(GameObject)).FullName;
-
-    void InvokeAll(string componentName, string methodName, System.Object[] arguments)
-    {
-        // We'll search for a type matching the given component name.
-        System.Type type;
-
-        // First, check our own CSharp assembly (no extra qualification needed).
-        type = System.Type.GetType(componentName);
-
-        // If not found there, then check the UnityEngine assembly.
-        if (type == null)
-        {
-            string qualifiedName = string.Format("UnityEngine.{0}",
-                System.Reflection.Assembly.CreateQualifiedName
-                (engineAssemblyName, componentName));
-            type = System.Type.GetType(qualifiedName);
-        }
-
-        if (type == null)
-        {
-            Debug.LogErrorFormat(
-                  "Could not find type {0} in Assembly-CSharp or UnityEngine.",
-                  componentName);
-            return;
-        }
-
-        // We've found a valid type.
-        // Use the Unity method to retrieve all active instances in the scene.
-        var components = FindObjectsOfType(type);
-
-        // Note: this currently works only for methods with a single definition.
-        // More information is needed to disambiguate which method you want when
-        // it has multiple overloads (same name with different signatures).
-        var method = type.GetMethod(methodName);
-
-        // If you need to access private/protected methods too,
-        // use this version that peeks into non-public areas...
-        //var method = type.GetMethod(methodName, 
-        //      System.Reflection.BindingFlags.Public 
-        //    | System.Reflection.BindingFlags.NonPublic 
-        //    | System.Reflection.BindingFlags.Instance);
-
-        // You could also search through the array to select only 
-        // certain instances to invoke...
-        foreach (var component in components)
-        {
-            method.Invoke(component, arguments);
-        }
-    }
-    */
-
     #region[Extensions]
 
     // Quick and dirty class to dump a simple object to string block
@@ -464,4 +402,64 @@ namespace RuntimeUnityEditor.Core.Networking.TCPServer
     }
 
     #endregion
+
+    /* TESTING ! TESTING ! TESTING ! TESTING ! TESTING ! TESTING ! TESTING ! TESTING ! TESTING ! TESTING !
+    
+    // ref: https://gamedev.stackexchange.com/questions/141088/how-can-i-look-up-an-object-given-only-the-name-of-its-type?rq=1
+    // Not really what I was hoping for so trying several different methods
+    
+    // References to the Unity Engine types need an assembly qualified name,
+    // so we cache that here. Repeat for any 3rd-party assemblies you use.
+    static readonly string engineAssemblyName = System.Reflection.Assembly.GetAssembly(typeof(GameObject)).FullName;
+
+    void InvokeAll(string componentName, string methodName, System.Object[] arguments)
+    {
+        // We'll search for a type matching the given component name.
+        System.Type type;
+
+        // First, check our own CSharp assembly (no extra qualification needed).
+        type = System.Type.GetType(componentName);
+
+        // If not found there, then check the UnityEngine assembly.
+        if (type == null)
+        {
+            string qualifiedName = string.Format("UnityEngine.{0}",
+                System.Reflection.Assembly.CreateQualifiedName
+                (engineAssemblyName, componentName));
+            type = System.Type.GetType(qualifiedName);
+        }
+
+        if (type == null)
+        {
+            Debug.LogErrorFormat(
+                  "Could not find type {0} in Assembly-CSharp or UnityEngine.",
+                  componentName);
+            return;
+        }
+
+        // We've found a valid type.
+        // Use the Unity method to retrieve all active instances in the scene.
+        var components = FindObjectsOfType(type);
+
+        // Note: this currently works only for methods with a single definition.
+        // More information is needed to disambiguate which method you want when
+        // it has multiple overloads (same name with different signatures).
+        var method = type.GetMethod(methodName);
+
+        // If you need to access private/protected methods too,
+        // use this version that peeks into non-public areas...
+        //var method = type.GetMethod(methodName, 
+        //      System.Reflection.BindingFlags.Public 
+        //    | System.Reflection.BindingFlags.NonPublic 
+        //    | System.Reflection.BindingFlags.Instance);
+
+        // You could also search through the array to select only 
+        // certain instances to invoke...
+        foreach (var component in components)
+        {
+            method.Invoke(component, arguments);
+        }
+    }
+    */
+
 }

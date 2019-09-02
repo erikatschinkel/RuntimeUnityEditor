@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using RuntimeUnityEditor.Core;
 using RuntimeUnityEditor.Core.Networking.TCPServer;
 using RuntimeUnityEditor.Core.Networking.IPCServer;
+using RuntimeUnityEditor.Core.Networking.Remoting;
 using LogLevel = RuntimeUnityEditor.Core.LogLevel;
 
 namespace RuntimeUnityEditor.Bepin5
@@ -23,6 +24,8 @@ namespace RuntimeUnityEditor.Bepin5
         private TelnetServer telnetServer = new TelnetServer();
 
         private IPCServer ipcServer = new IPCServer();
+
+        private RemotingServer remotingServer = new RemotingServer();
         // END EDIT ---------------------------------------------------------------------------------------------------------------
 
         #endregion
@@ -36,6 +39,7 @@ namespace RuntimeUnityEditor.Bepin5
             // Wh010ne Fork --------------------------------
             telnetServer.OnGUI();
             ipcServer.OnGUI();
+            remotingServer.OnGUI();
             // END EDIT ------------------------------------
         }
 
@@ -52,8 +56,9 @@ namespace RuntimeUnityEditor.Bepin5
             DnSpyHelper.DnSpyPath = DnSpyPath.Value;
 
             // Wh010ne Fork --------------------------------
-            Instance.TelnetState = true;
+            //Instance.TelnetState = false;
             //Instance.IPCState = true;
+            Instance.RemotingState = true;
             // END EDIT ------------------------------------
         }
 
@@ -64,6 +69,7 @@ namespace RuntimeUnityEditor.Bepin5
             // Wh010ne Fork --------------------------------
             telnetServer.Update();
             ipcServer.Update();
+            remotingServer.Update();
             // END EDIT ------------------------------------
         }
 

@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuntimeUnityEditor.Bepin5",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamedPipeTestClient", "NamedPipeTestClient\NamedPipeTestClient.csproj", "{053DA278-4C17-4454-B9A3-E23EDD0C874B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemotingShared", "RemotingShared\RemotingShared.csproj", "{CE031DF1-3E64-4125-8AB5-CEA6993440CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemotingTestClient", "RemotingTestClient\RemotingTestClient.csproj", "{B7940D9C-17B2-4189-8156-515225F2B147}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{053DA278-4C17-4454-B9A3-E23EDD0C874B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{053DA278-4C17-4454-B9A3-E23EDD0C874B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{053DA278-4C17-4454-B9A3-E23EDD0C874B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE031DF1-3E64-4125-8AB5-CEA6993440CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE031DF1-3E64-4125-8AB5-CEA6993440CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE031DF1-3E64-4125-8AB5-CEA6993440CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE031DF1-3E64-4125-8AB5-CEA6993440CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7940D9C-17B2-4189-8156-515225F2B147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7940D9C-17B2-4189-8156-515225F2B147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7940D9C-17B2-4189-8156-515225F2B147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7940D9C-17B2-4189-8156-515225F2B147}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

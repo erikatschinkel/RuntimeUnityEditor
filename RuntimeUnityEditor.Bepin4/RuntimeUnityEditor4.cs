@@ -3,6 +3,7 @@ using BepInEx;
 using RuntimeUnityEditor.Core;
 using RuntimeUnityEditor.Core.Networking.TCPServer;
 using RuntimeUnityEditor.Core.Networking.IPCServer;
+using RuntimeUnityEditor.Core.Networking.Remoting;
 
 namespace RuntimeUnityEditor.Bepin4
 {
@@ -22,6 +23,8 @@ namespace RuntimeUnityEditor.Bepin4
         private TelnetServer telnetServer = new TelnetServer();
 
         private IPCServer ipcServer = new IPCServer();
+
+        private RemotingServer remotingServer = new RemotingServer();
         //END EDIT ---------------------------------------------------------------------------------------------------------------
 
         public static RuntimeUnityEditorCore Instance { get; set; }
@@ -37,6 +40,7 @@ namespace RuntimeUnityEditor.Bepin4
             // Wh010ne Fork --------------------------------
             telnetServer.OnGUI();
             ipcServer.OnGUI();
+            remotingServer.OnGUI();
             // END EDIT ------------------------------------
         }
 
@@ -53,8 +57,9 @@ namespace RuntimeUnityEditor.Bepin4
             DnSpyHelper.DnSpyPath = DnSpyPath.Value;
 
             // Wh010ne Fork --------------------------------
-            Instance.TelnetState = true;
+            //Instance.TelnetState = false;
             //Instance.IPCState = true;
+            //Instance.RemotingState = true;
             // END EDIT ------------------------------------
         }
 
@@ -65,6 +70,7 @@ namespace RuntimeUnityEditor.Bepin4
             // Wh010ne Fork --------------------------------
             telnetServer.Update();
             ipcServer.Update();
+            remotingServer.Update();
             // END EDIT ------------------------------------
         }
 

@@ -10,8 +10,29 @@ namespace RuntimeUnityEditor.Core.Debugging
 {
     public class DebugHelpers
     {
+        #region[Declarations]
+
         public static string debugPath = Application.dataPath;
 
+        public DebugHelpers instance;
+
+        #endregion
+
+        #region[Constructor]
+
+        public DebugHelpers()
+        {
+            SetDebugPath();
+            instance = this;
+        }
+
+        #endregion
+
+        #region[Main]
+
+        /// <summary>
+        /// Creates/Sets the Debug path to RootGameFolder\DEBUG_LOGS\ - Note: trailing backslash
+        /// </summary>
         public static void SetDebugPath()
         {
             if (Directory.Exists(Application.dataPath)) { debugPath = Application.dataPath; }
@@ -20,6 +41,9 @@ namespace RuntimeUnityEditor.Core.Debugging
             if (!Directory.Exists(debugPath) || !Directory.Exists(debugPath + "Types")) { Directory.CreateDirectory(debugPath); Directory.CreateDirectory(debugPath + "Types"); }
         }
 
+        /// <summary>
+        /// Dumps all extra debug details regarding all loaded Assemblies, Types, Methods, Properties, etc
+        /// </summary>
         public static void DebugWriteDetails()
         {
             string strAssemblies = "Loaded Assemblies:\r\n\r\n";
@@ -48,6 +72,10 @@ namespace RuntimeUnityEditor.Core.Debugging
             File.WriteAllText(debugPath + "LOADED_ASSEMBLIES.txt", strAssemblies);
         }
 
+        #endregion
+
+        #region[Helpers]
+
         public static string GetAssemblyFullPath(Assembly assembly)
         {
             try
@@ -75,16 +103,18 @@ namespace RuntimeUnityEditor.Core.Debugging
 
         }
 
-        private static string PopulateTypeInfo(Type type)
+        public static string PopulateTypeInfo(Type type)
         {
             string details = "";
 
             IEnumerable<MethodInfo> methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public).Where(m => { var method = m as MethodInfo; return method == null || !m.IsSpecialName; });
             IEnumerable<MemberInfo> propertyAccessors = type.GetProperties(BindingFlags.Static | BindingFlags.Public).SelectMany(p => p.GetAccessors()).Cast<MemberInfo>();
             IEnumerable<MemberInfo> eventAccessors = type.GetEvents(BindingFlags.Static | BindingFlags.Public).SelectMany(e => new[] { e.GetAddMethod(true), e.GetRemoveMethod(true)}).Cast<MemberInfo>();
+            
+            // Only commented out for my purposes, uncomment if you want to populate accessors and all members
             //IEnumerable<MemberInfo> accessors = propertyAccessors.Concat(eventAccessors);
 
-            //IEnumerable<MemberInfo> memberList = type.GetMembers(BindingFlags.Static | BindingFlags.Public).Except(accessors); //Alternate Method to below
+            //IEnumerable<MemberInfo> memberList = type.GetMembers(BindingFlags.Static | BindingFlags.Public).Except(accessors); //Alternate Method to below, below only get the those declared Public
             //IEnumerable<MemberInfo> memberList = type.GetMembers(BindingFlags.Static | BindingFlags.Public).Where(m => { var method = m as MethodBase; return method == null || !method.IsSpecialName; });
             
             /*
@@ -131,5 +161,7 @@ namespace RuntimeUnityEditor.Core.Debugging
 
             return details;
         }
+
+        #endregion
     }
 }

@@ -6,6 +6,7 @@ using RuntimeUnityEditor.Core.REPL;
 using RuntimeUnityEditor.Core.Debugging;
 using RuntimeUnityEditor.Core.Networking.TCPServer;
 using RuntimeUnityEditor.Core.Networking.IPCServer;
+using RuntimeUnityEditor.Core.Networking.Remoting;
 using UnityEngine;
 
 namespace RuntimeUnityEditor.Core
@@ -35,10 +36,12 @@ namespace RuntimeUnityEditor.Core
         // Wh010ne Fork -----------------------------------------------------------------------------------------------------------
         private TelnetServer _tcpServer = new TelnetServer();
         private IPCServer _ipcServer = new IPCServer();
+        private RemotingServer _remotingServer = new RemotingServer();
         public static bool _enableDebug { get; set; }
 
         public KeyCode IPCOnOff { get; set; } = KeyCode.F11;
         public KeyCode TelnetOnOff { get; set; } = KeyCode.F10;
+        public KeyCode RemotingOnOff { get; set; } = KeyCode.F9;
         // END EDIT ---------------------------------------------------------------------------------------------------------------
 
         #endregion
@@ -112,6 +115,9 @@ namespace RuntimeUnityEditor.Core
 
             if (Input.GetKeyDown(TelnetOnOff))
                 TelnetState = !TelnetState;
+
+            if (Input.GetKeyDown(RemotingOnOff))
+                RemotingState = !RemotingState;
             //END EDIT ---------------------------------------
 
             Inspector.InspectorUpdate();
@@ -186,6 +192,24 @@ namespace RuntimeUnityEditor.Core
                 else
                 {
                     _ipcServer.StopServer();
+                }
+            }
+        }
+
+        public bool RemotingState
+        {
+            get => _remotingServer.isRunning;
+            set
+            {
+                if (value)
+                {
+                    if (!_remotingServer.isRunning)
+                        _remotingServer.Start();
+                }
+                else
+                {
+                    if (_remotingServer.isRunning)
+                        _remotingServer.StopServer();
                 }
             }
         }

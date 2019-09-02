@@ -34,10 +34,7 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
 
         public void Start() { }
 
-        public void OnGUI()
-        {
-
-        }
+        public void OnGUI() { }
 
         public void Update() { }
 
@@ -61,9 +58,13 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
         public void StopServer()
         {
             Console.WriteLine("[IPC Server Shutting Down]");
+
             IPCKillClient.SendKillRequest();
+
             IPCThread.Interrupt();
+
             if (!IPCThread.Join(200)) { IPCThread.Abort(); }
+
             this.isRunning = false;
         }
     }

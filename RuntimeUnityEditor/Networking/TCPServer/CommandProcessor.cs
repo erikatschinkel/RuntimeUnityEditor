@@ -74,8 +74,6 @@ namespace RuntimeUnityEditor.Core.Networking.TCPServer
                     break;
                 case "Describe":
                     result = InteractiveBase.Describe((object)dataText);
-                    File.WriteAllText(DebugHelpers.debugPath + "TELNET_CommandProcessDebug.txt", "command: " + command + "\r\ndata: " + dataText);
-                    if (result != "") { File.WriteAllText(DebugHelpers.debugPath + "TMP.txt", result); }
                     break;
                 case "Print":
                     if (!dataText.Contains(","))
@@ -162,6 +160,7 @@ namespace RuntimeUnityEditor.Core.Networking.TCPServer
         */
     }
 
+    // Test Object for Testing
     public class Order
     {
         public string ProductName { get; set; }

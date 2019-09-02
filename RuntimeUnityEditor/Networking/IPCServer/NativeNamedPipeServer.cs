@@ -35,14 +35,14 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
                 // ----------------------------------------------------------------------------------------------------------------
                 // Create the named pipe. 
                 using (SafePipeHandle hNamedPipe = NativeMethod.CreateNamedPipe(
-                    IPCServer.FullPipeName,           // The unique pipe name. 
+                    IPCServer.FullPipeName,             // The unique pipe name. 
                     PipeOpenMode.PIPE_ACCESS_DUPLEX,    // The pipe is duplex 
                     PipeMode.PIPE_TYPE_MESSAGE |        // Message type pipe  
                     PipeMode.PIPE_READMODE_MESSAGE |    // Message-read mode  
                     PipeMode.PIPE_WAIT,                 // Blocking mode is on 
                     2,                                  // Max server instances 
-                    IPCServer.BufferSize,             // Output buffer size 
-                    IPCServer.BufferSize,             // Input buffer size 
+                    IPCServer.BufferSize,               // Output buffer size 
+                    IPCServer.BufferSize,               // Input buffer size 
                     NMPWAIT_USE_DEFAULT_WAIT            // Time-out interval
                     ))
                 {
@@ -160,7 +160,6 @@ namespace RuntimeUnityEditor.Core.Networking.IPCServer
 
             if (KillServerRequested) { _ipcServer.StopServer(); }
         }
-
 
         /// <summary> 
         /// CreateNativePipeSecurity creates and initializes a new SECURITY_ATTRIBUTES object to allow Authenticated Users read and  
