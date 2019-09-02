@@ -73,17 +73,19 @@ namespace RemotingTestClient
             // 
             this.txtFromServer.BackColor = System.Drawing.Color.Linen;
             this.txtFromServer.Location = new System.Drawing.Point(6, 19);
+            this.txtFromServer.MaxLength = 64767;
             this.txtFromServer.Multiline = true;
             this.txtFromServer.Name = "txtFromServer";
-            this.txtFromServer.Size = new System.Drawing.Size(348, 133);
+            this.txtFromServer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtFromServer.Size = new System.Drawing.Size(348, 159);
             this.txtFromServer.TabIndex = 3;
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.txtFromServer);
-            this.groupBox1.Location = new System.Drawing.Point(12, 136);
+            this.groupBox1.Location = new System.Drawing.Point(12, 175);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(360, 158);
+            this.groupBox1.Size = new System.Drawing.Size(360, 184);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Messages";
@@ -95,7 +97,7 @@ namespace RemotingTestClient
             this.groupBox2.Controls.Add(this.btnRegister);
             this.groupBox2.Location = new System.Drawing.Point(12, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(96, 118);
+            this.groupBox2.Size = new System.Drawing.Size(96, 157);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Register";
@@ -104,16 +106,16 @@ namespace RemotingTestClient
             // 
             this.groupBox3.Controls.Add(this.btnSend);
             this.groupBox3.Controls.Add(this.txtToServer);
-            this.groupBox3.Location = new System.Drawing.Point(115, 12);
+            this.groupBox3.Location = new System.Drawing.Point(12, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(257, 118);
+            this.groupBox3.Size = new System.Drawing.Size(360, 157);
             this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Message To Server";
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(176, 22);
+            this.btnSend.Location = new System.Drawing.Point(279, 22);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 23);
             this.btnSend.TabIndex = 5;
@@ -126,19 +128,19 @@ namespace RemotingTestClient
             this.txtToServer.Location = new System.Drawing.Point(6, 19);
             this.txtToServer.Multiline = true;
             this.txtToServer.Name = "txtToServer";
-            this.txtToServer.Size = new System.Drawing.Size(164, 92);
+            this.txtToServer.Size = new System.Drawing.Size(267, 132);
             this.txtToServer.TabIndex = 4;
-            this.txtToServer.Text = "RailsCost=500";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 307);
+            this.ClientSize = new System.Drawing.Size(384, 367);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remoting Test Client";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

@@ -55,7 +55,7 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
             }
             else
             {
-                Console.WriteLine("[Remoting Server Already Running!]");
+                Console.WriteLine("[Remoting Server]: Already Running!");
             }
         }
 
@@ -84,7 +84,7 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
 
         private void StartServer()
         {
-            Console.WriteLine("[Starting Remoting Server]");
+            Console.WriteLine("[Remoting Server]: Starting");
 
             // Register a server channel on the Server where we will listen for clients
             RegisterChannel();
@@ -99,12 +99,12 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
 
             this.isRunning = true;
 
-            Console.WriteLine("[Remoting Server Running]");
+            Console.WriteLine("[Remoting Server]: Running");
         }
 
         public void StopServer()
         {
-            Console.WriteLine("[Stopping Remoting Server]");
+            Console.WriteLine("[Remoting Server]: Stopping!]");
 
             _ServerStopping = true;
 
@@ -114,7 +114,7 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
         // Registers a new Remoting httpChannel utilizing SOAP formatter for serialization
         private void RegisterChannel()
         {
-            Console.WriteLine("[Registering a Remoting httpChannel]");
+            Console.WriteLine("[Remoting Server]: Registering httpChannel");
 
             try
             {
@@ -143,11 +143,11 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
             {
                 if (!e.Message.Contains("Prefix already in use."))
                 {
-                    Console.WriteLine("[Remoting Server ERROR] - Message: " + e.Message);
+                    Console.WriteLine("[Remoting Server ERROR]: Message - " + e.Message);
                 }
                 else
                 {
-                    Console.WriteLine("[Remoting httpChannel Registered]");
+                    Console.WriteLine("[Remoting Server]: httpChannel Registered");
                 }
             }
         }
@@ -155,7 +155,7 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
         // The method that will be called when a new client registers.
         private void NewClient(string ClientID)
         {
-            Console.WriteLine("[Adding New Remoting Client] - " + ClientID);
+            Console.WriteLine("[Remoting Server]: Registering New Client - " + ClientID);
             _Clients.Add(ClientID);
 
             // since it originated from a different thread we need to marshal this back to the current UI thread.
@@ -182,7 +182,7 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
             //    this.txtFromClient.Invoke(new delegateCommsInfo(ClientToHost), new object[] { Info });
             //else { }
 
-            Console.WriteLine("[Received Message]: " + Info.Message);
+            Console.WriteLine("[Remoting Server]: Received - " + Info.Message);
         }
 
         // Called from our t.Start(). A loop invoked by a worker-thread which will monitor the static thread-safe  
@@ -201,16 +201,45 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
 
                     //----------------------------------------------------------------------------------------------------------
                     // EXAMPLE (Each game is Different, check your Assembly-CSharp.dll)
-                    // check if client is setting a new RailsCost
-                    if(message.Message.IndexOf("RailsCost=") > -1)
+                    bool loaded = false;
+                    var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+
+                    if (currentScene.name != "MainMenu")
                     {
-                        // try to update the Games actual value
-                        string[] keypair = message.Message.Split('=');
-                        Game.Settings.RailsCost = int.Parse(keypair[1].Trim());
+                        Game.Settings.RailsCost = message.GConfig.RailsCost;
+                        Game.Settings.RailsRefund = message.GConfig.RailsRefund;
+                        Game.Settings.EngineMaxVagonsBase = message.GConfig.EngineMaxVagonsBase;
+                        Game.Settings.EngineMaxVagonsPerGeneration = message.GConfig.EngineMaxVagonsPerGeneration;
+                        Game.Settings.EnginePriceBase = message.GConfig.EnginePriceBase;
+                        Game.Settings.EnginePricePerGeneration = message.GConfig.EnginePricePerGeneration;
+                        Game.Settings.EnginePricePerUpgrade = message.GConfig.EnginePricePerUpgrade;
+                        Game.Settings.EngineSpeedFullLoad = message.GConfig.EngineSpeedFullLoad;
+                        Game.Settings.EngineAccelerationFullLoad = message.GConfig.EngineAccelerationFullLoad;
+                        loaded = true;
                     }
-                    
-                    //In this case I'm just sending back the GameConfiguration object
-                    SendToClient("GameConfig:", _Clients.FirstOrDefault());
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("    RailsCost=" + message.GConfig.RailsCost.ToString());
+                    sb.AppendLine("    RailsRefund=" + message.GConfig.RailsRefund.ToString());
+                    sb.AppendLine("    NumBaseCars=" + message.GConfig.EngineMaxVagonsBase.ToString());
+                    sb.AppendLine("    NumCarsPerGen=" + message.GConfig.EngineMaxVagonsPerGeneration.ToString());
+                    sb.AppendLine("    EnginePrice=" + message.GConfig.EnginePriceBase.ToString());
+                    sb.AppendLine("    EnginePricePerGen=" + message.GConfig.EnginePricePerGeneration.ToString());
+                    sb.AppendLine("    EnginePriceUpgrade=" + message.GConfig.EnginePricePerUpgrade.ToString());
+                    sb.AppendLine("    EngineFullLoadSpeed=" + message.GConfig.EngineSpeedFullLoad.ToString());
+                    sb.AppendLine("    EngineFullLoadAccel=" + message.GConfig.EngineAccelerationFullLoad.ToString());                    
+
+                    //In this case I'm just sending back the Updated GameConfiguration object
+                    if (loaded == true)
+                    {
+                        Console.WriteLine("[Remoting Server]: Received Message\r\n\r\nGameConfig:\r\n" + sb.ToString());
+                        SendToClient("GameConfig", _Clients.FirstOrDefault(), false, Game.Settings);
+                    }
+                    else
+                    {
+                        Console.WriteLine("[Remoting Server]: Received Message\r\n\r\nDefault GameConfig:\r\n" + sb.ToString());
+                        SendToClient("NOTLOADED", _Clients.FirstOrDefault(), false, new GameConfiguration());
+                    }
                     //----------------------------------------------------------------------------------------------------------
                 }
             }
@@ -220,22 +249,23 @@ namespace RuntimeUnityEditor.Core.Networking.Remoting
 
         #region[Sending]
 
-        // Send a message to client
-        private void SendToClient(string message, string client, bool allClients = false)
+        // Send a message to client. EXAMPLE Params, you can replace GameConfiguration
+        private void SendToClient(string message, string client, bool allClients = false, GameConfiguration gConfig = null)
         {
-            if (_Clients.Count == 0) { Console.WriteLine("[No Remoting Clients Registered!]"); return; }
+            if (_Clients.Count == 0) { Console.WriteLine("[Remoting Server]: No Clients Registered!"); return; }
 
             string ClientID = _Clients.FirstOrDefault(s => s.Contains(client));
-            if (ClientID == null) { Console.WriteLine("[Client Doesn't Exist in Registered Remoting Clients!]"); return; }
+            if (ClientID == null) { Console.WriteLine("[Remoting Server]: Client Doesn't Exist!]"); return; }
             if (allClients) ClientID = "*";
 
             //----------------------------------------------------------------------------------------------------------
-            GameConfiguration gConfig = Game.Settings; // EXAMPLE (Each game is Different, check your Assembly-CSharp.dll)
+            // Remember, we don't modify it server side the game does that, we just pass the object to the client and
+            // let the client modify it and send it back. When we get it back, we update the Game object.
+            // EXAMPLE (Each game is Different, check your Assembly-CSharp.dll)
+            RemotingComms.RaiseHostToClient(ClientID, message, gConfig);
             //----------------------------------------------------------------------------------------------------------
 
-            RemotingComms.RaiseHostToClient(ClientID, message, gConfig);
-
-            Console.WriteLine("[Server Replied to Client]");
+            //Console.WriteLine("[Remoting Server]: Server Replied to Client");
         }
 
         #endregion
