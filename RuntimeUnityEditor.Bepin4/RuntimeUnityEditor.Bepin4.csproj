@@ -40,9 +40,8 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libraries\Unity\unity-2017.1\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine">
+      <HintPath>..\libraries\Unity\unity-5.6\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

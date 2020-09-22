@@ -44,7 +44,7 @@ namespace RemotingTestClient
             // 
             // btnRegister
             // 
-            this.btnRegister.Location = new System.Drawing.Point(9, 88);
+            this.btnRegister.Location = new System.Drawing.Point(9, 62);
             this.btnRegister.Name = "btnRegister";
             this.btnRegister.Size = new System.Drawing.Size(75, 23);
             this.btnRegister.TabIndex = 0;
@@ -55,7 +55,7 @@ namespace RemotingTestClient
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 32);
+            this.label1.Location = new System.Drawing.Point(6, 20);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(75, 13);
             this.label1.TabIndex = 1;
@@ -63,7 +63,7 @@ namespace RemotingTestClient
             // 
             // txtClientID
             // 
-            this.txtClientID.Location = new System.Drawing.Point(9, 48);
+            this.txtClientID.Location = new System.Drawing.Point(9, 36);
             this.txtClientID.Name = "txtClientID";
             this.txtClientID.Size = new System.Drawing.Size(75, 20);
             this.txtClientID.TabIndex = 2;
@@ -92,20 +92,21 @@ namespace RemotingTestClient
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnRegister);
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.txtClientID);
-            this.groupBox2.Controls.Add(this.btnRegister);
-            this.groupBox2.Location = new System.Drawing.Point(12, 12);
+            this.groupBox2.Location = new System.Drawing.Point(270, 51);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(96, 157);
+            this.groupBox2.Size = new System.Drawing.Size(90, 106);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Register";
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.btnSend);
             this.groupBox3.Controls.Add(this.txtToServer);
+            this.groupBox3.Controls.Add(this.groupBox2);
+            this.groupBox3.Controls.Add(this.btnSend);
             this.groupBox3.Location = new System.Drawing.Point(12, 12);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(360, 157);
@@ -136,9 +137,8 @@ namespace RemotingTestClient
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 367);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.groupBox3);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remoting Test Client";

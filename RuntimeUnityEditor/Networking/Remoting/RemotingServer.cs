@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Runtime.Remoting; //Note: Use the one from the Mono in the Unity install folder. Unity's version is a lightweight version.
+using System.Runtime.Remoting; //Note: Use the one from Mono in the Unity install folder. Unity's version is a lightweight version.
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Http;
 using System.Runtime.Serialization.Formatters;

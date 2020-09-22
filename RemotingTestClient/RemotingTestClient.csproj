@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\Games\Train Valley 2\TrainValley2_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Games\0-SMALL GAMES\Train Valley 2 Build 164\TrainValley2_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System">
@@ -49,20 +49,17 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Remoting">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Private>True</Private>
     </Reference>
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Games\Train Valley 2\TrainValley2_Data\Managed\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\..\..\Games\0-SMALL GAMES\Train Valley 2 Build 164\TrainValley2_Data\Managed\UnityEngine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\..\Games\Train Valley 2\TrainValley2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Games\0-SMALL GAMES\Train Valley 2 Build 164\TrainValley2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -104,7 +101,6 @@
     <ProjectReference Include="..\RemotingShared\RemotingShared.csproj">
       <Project>{ce031df1-3e64-4125-8ab5-cea6993440cd}</Project>
       <Name>RemotingShared</Name>
-      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

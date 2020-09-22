@@ -79,6 +79,7 @@ namespace RemotingTestClient
         /// <param name="info"></param>
         void CallbackSink_OnHostToClient(CommsInfo info)
         {
+            
             // EXAMPLE (Each game is Different, check your Assembly-CSharp.dll)
             gameConfiguration = info.GConfig;
 
@@ -110,6 +111,7 @@ namespace RemotingTestClient
                     this.txtFromServer.Text = "Load a Level Before Sending!";
                 }
             }
+            
             //----------------------------------------------------------------------------------------------------------------------------------
         }
 
@@ -123,12 +125,11 @@ namespace RemotingTestClient
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btnSend_Click(object sender, EventArgs e)
-        {
-            
+        {            
             // EXAMPLE (Each game is Different, check your Assembly-CSharp.dll)
             string[] tmp = txtToServer.Text.Split(new string[] { "\r\n" }, StringSplitOptions.None);
             StringBuilder sb = new StringBuilder();
-
+            
             foreach (string line in tmp)
             {
                 if (line != String.Empty)
@@ -174,6 +175,7 @@ namespace RemotingTestClient
             
             _ServerTalk.SendMessageToServer(new CommsInfo("GameConfig", gameConfiguration));
             this.txtFromServer.Text = "[Sent Message]: GameConfig\r\n" + sb.ToString() + "\r\n" + this.txtFromServer.Text;
+            
         }
 
         #endregion
