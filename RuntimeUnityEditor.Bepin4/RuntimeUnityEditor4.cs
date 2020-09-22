@@ -7,7 +7,7 @@ using RuntimeUnityEditor.Core.Networking.Remoting;
 
 namespace RuntimeUnityEditor.Bepin4
 {
-    [BepInPlugin(RuntimeUnityEditorCore.GUID, "Runtime Unity Editor", RuntimeUnityEditorCore.Version)]
+    [BepInPlugin(RuntimeUnityEditorCore.GUID, "Runtime Unity Editor (Legacy)", RuntimeUnityEditorCore.Version)]
     public class RuntimeUnityEditor4 : BaseUnityPlugin
     {
         #region[Declarations]
@@ -46,12 +46,16 @@ namespace RuntimeUnityEditor.Bepin4
 
         private void Start()
         {
+<<<<<<< HEAD
             //Wh010ne Fork -----------------------------------------------------------------------------------------------------------
             EnableDebug = new ConfigWrapper<string>("enableDebugDump", "DEBUGGING", bool.FalseString);       
             //END EDIT ---------------------------------------------------------------------------------------------------------------
 
             Instance = new RuntimeUnityEditorCore(this, new Logger(), bool.Parse(EnableDebug.Value)); //Wh010ne Fork Edited
 
+=======
+            Instance = new RuntimeUnityEditorCore(this, new Logger(), Paths.PluginPath);
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153
             DnSpyPath = new ConfigWrapper<string>(nameof(DnSpyPath), this);
             DnSpyPath.SettingChanged += (sender, args) => DnSpyHelper.DnSpyPath = DnSpyPath.Value;
             DnSpyHelper.DnSpyPath = DnSpyPath.Value;
@@ -74,15 +78,22 @@ namespace RuntimeUnityEditor.Bepin4
             // END EDIT ------------------------------------
         }
 
+<<<<<<< HEAD
         #endregion
 
         #region[Logging]
+=======
+        private void LateUpdate()
+        {
+            Instance.LateUpdate();
+        }
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153
 
         private sealed class Logger : ILoggerWrapper
         {
             public void Log(LogLevel logLogLevel, object content)
             {
-                BepInEx.Logger.Log((BepInEx.Logging.LogLevel) logLogLevel, content);
+                BepInEx.Logger.Log((BepInEx.Logging.LogLevel) logLogLevel, "[RuntimeEditor]" + content);
             }
         }
 

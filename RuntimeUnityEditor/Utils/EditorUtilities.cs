@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,94 +10,9 @@ namespace RuntimeUnityEditor.Core.Utils
 {
     public static class EditorUtilities
     {
-        private static Texture2D WindowBackground { get; set; }
-
-        public static void DrawSolidWindowBackground(Rect windowRect)
-        {
-            if (WindowBackground == null)
-            {
-                var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-                windowBackground.SetPixel(0, 0, new Color(0.6f, 0.6f, 0.6f, 1));
-                windowBackground.Apply();
-                WindowBackground = windowBackground;
-            }
-
-            // It's necessary to make a new GUIStyle here or the texture doesn't show up
-            GUI.Box(windowRect, GUIContent.none, new GUIStyle { normal = new GUIStyleState { background = WindowBackground } });
-        }
-
-        public static void DrawSeparator()
-        {
-            GUILayout.Space(5);
-        }
-
-        private static readonly Dictionary<Type, Func<object, string>> CustomObjectToString = new Dictionary<Type, Func<object, string>>();
-
-        public static void AddCustomObjectToString<TObj>(Func<TObj, string> func)
-        {
-            CustomObjectToString.Add(typeof(TObj), o => func.Invoke((TObj)o));
-        }
-
-        public static string ExtractText(object value)
-        {
-            if (value == null) return "NULL";
-            switch (value)
-            {
-                case string str:
-                    return str;
-                case Transform t:
-                    return t.name;
-                case GameObject o:
-                    return o.name;
-                case Exception ex:
-                    return "EXCEPTION: " + ex.Message;
-            }
-
-            var valueType = value.GetType();
-
-            if (CustomObjectToString.TryGetValue(valueType, out var func))
-                return func(value);
-
-            if(value is ICollection collection)
-                return $"Count = {collection.Count}";
-
-            if (value is IEnumerable _)
-            {
-                var property = valueType.GetProperty("Count", BindingFlags.Public | BindingFlags.Instance);
-                if (property != null && property.CanRead)
-                {
-                    if (property.GetValue(value, null) is int count)
-                        return $"Count = {count}";
-                }
-                
-                return "IS ENUMERABLE";
-            }
-
-            try
-            {
-                if (valueType.IsGenericType)
-                {
-                    var baseType = valueType.GetGenericTypeDefinition();
-                    if (baseType == typeof(KeyValuePair<,>))
-                    {
-                        //var argTypes = baseType.GetGenericArguments();
-                        var kvpKey = valueType.GetProperty("Key")?.GetValue(value, null);
-                        var kvpValue = valueType.GetProperty("Value")?.GetValue(value, null);
-                        return $"[{ExtractText(kvpKey)} | {ExtractText(kvpValue)}]";
-                    }
-                }
-
-                return value.ToString();
-            }
-            catch
-            {
-                return valueType.Name;
-            }
-        }
-
         public static IEnumerable<ReadonlyCacheEntry> GetTransformScanner()
         {
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "[CheatTools] Looking for Transforms...");
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "Looking for Transforms...");
 
             var trt = typeof(Transform);
             var types = GetAllComponentTypes().Where(x => trt.IsAssignableFrom(x));
@@ -109,7 +23,7 @@ namespace RuntimeUnityEditor.Core.Utils
 
         public static IEnumerable<ReadonlyCacheEntry> GetRootGoScanner()
         {
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "[CheatTools] Looking for Root Game Objects...");
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "Looking for Root Game Objects...");
 
             foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>().Where(x => x.transform == x.transform.root))
                 yield return new ReadonlyCacheEntry($"GameObject({go.name})", go);
@@ -117,7 +31,7 @@ namespace RuntimeUnityEditor.Core.Utils
 
         public static IEnumerable<ReadonlyCacheEntry> GetMonoBehaviourScanner()
         {
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "[CheatTools] Looking for MonoBehaviours...");
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "Looking for MonoBehaviours...");
 
             var mbt = typeof(MonoBehaviour);
             var types = GetAllComponentTypes().Where(x => mbt.IsAssignableFrom(x));
@@ -128,7 +42,7 @@ namespace RuntimeUnityEditor.Core.Utils
 
         public static IEnumerable<ReadonlyCacheEntry> GetComponentScanner()
         {
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "[CheatTools] Looking for Components...");
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "Looking for Components...");
 
             var mbt = typeof(MonoBehaviour);
             var trt = typeof(Transform);
@@ -162,37 +76,17 @@ namespace RuntimeUnityEditor.Core.Utils
         {
             var compType = typeof(Component);
             return AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(x =>
-                {
-                    try
-                    {
-                        return x.GetTypes();
-                    }
-                    catch (SystemException)
-                    {
-                        return Enumerable.Empty<Type>();
-                    }
-                })
+                .SelectMany(Extensions.GetTypesSafe)
                 .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters)
                 .Where(compType.IsAssignableFrom);
         }
 
         public static IEnumerable<ReadonlyCacheEntry> GetInstanceClassScanner()
         {
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "[CheatTools] Looking for class instances...");
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, "Looking for class instances...");
 
             var query = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(x =>
-                {
-                    try
-                    {
-                        return x.GetTypes();
-                    }
-                    catch (SystemException)
-                    {
-                        return Enumerable.Empty<Type>();
-                    }
-                })
+                .SelectMany(Extensions.GetTypesSafe)
                 .Where(t => t.IsClass && !t.IsAbstract && !t.ContainsGenericParameters);
 
             foreach (var type in query)
@@ -200,9 +94,7 @@ namespace RuntimeUnityEditor.Core.Utils
                 object obj = null;
                 try
                 {
-                    obj = type.GetProperty("Instance",
-                            BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                        ?.GetValue(null, null);
+                    obj = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)?.GetValue(null, null);
                 }
                 catch (Exception ex)
                 {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using RuntimeUnityEditor.Core.REPL.MCS;
+using RuntimeUnityEditor.Core.UI;
 using RuntimeUnityEditor.Core.Utils;
 using UnityEngine;
 
@@ -11,6 +13,7 @@ namespace RuntimeUnityEditor.Core.REPL
 {
     public sealed class ReplWindow
     {
+        private readonly string _autostartFilename;
         private static readonly char[] _inputSplitChars = { ',', ';', '<', '>', '(', ')', '[', ']', '=', '|', '&' };
 
         private const int HistoryLimit = 50;
@@ -31,43 +34,70 @@ namespace RuntimeUnityEditor.Core.REPL
         private TextEditor _textEditor;
         private int _newCursorLocation = -1;
 
-        private readonly HashSet<string> _namespaces;
+        public bool Show { get; set; } = true;
+
+        private HashSet<string> _namespaces;
+        private HashSet<string> Namespaces
+        {
+            get
+            {
+                if (_namespaces == null)
+                {
+                    _namespaces = new HashSet<string>(
+                        AppDomain.CurrentDomain.GetAssemblies()
+                            .SelectMany(Extensions.GetTypesSafe)
+                            .Where(x => x.IsPublic && !string.IsNullOrEmpty(x.Namespace))
+                            .Select(x => x.Namespace));
+                    RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, $"[REPL] Found {_namespaces.Count} public namespaces");
+                }
+                return _namespaces;
+            }
+        }
+
         private readonly List<Suggestion> _suggestions = new List<Suggestion>();
 
-        public ReplWindow()
+        public ReplWindow(string autostartFilename)
         {
+            _autostartFilename = autostartFilename;
             _windowId = GetHashCode();
 
             _sb.AppendLine("Welcome to C# REPL (read-evaluate-print loop)! Enter \"help\" to get a list of common methods.");
 
             _evaluator = new ScriptEvaluator(new StringWriter(_sb)) { InteractiveBaseClass = typeof(REPL) };
+        }
 
-            var envSetup = new[]
+        public void RunEnvSetup()
+        {
+            var envSetup = "using System;" +
+                           "using UnityEngine;" +
+                           "using System.Linq;" +
+                           "using System.Collections;" +
+                           "using System.Collections.Generic;";
+
+            Evaluate(envSetup);
+            RunAutostart(_autostartFilename);
+        }
+
+        private void RunAutostart(string autostartFilename)
+        {
+            if (File.Exists(autostartFilename))
             {
-                "using System;",
-                "using UnityEngine;",
-                "using System.Linq;",
-                "using System.Collections;",
-                "using System.Collections.Generic;",
-            };
-
-            foreach (var define in envSetup)
-                Evaluate(define);
-
-            _namespaces = new HashSet<string>(
-                AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(x =>
-                    {
-                        try { return x.GetTypes(); }
-                        catch { return Enumerable.Empty<Type>(); }
-                    })
-                .Where(x => x.IsPublic && !string.IsNullOrEmpty(x.Namespace))
-                .Select(x => x.Namespace));
-            RuntimeUnityEditorCore.Logger.Log(LogLevel.Debug, $"[REPL] Found {_namespaces.Count} public namespaces");
+                var allLines = File.ReadAllLines(autostartFilename).Select(x => x.Trim('\t', ' ', '\r', '\n')).Where(x => !string.IsNullOrEmpty(x) && !x.StartsWith("//")).ToArray();
+                if (allLines.Length > 0)
+                {
+                    var message = "Executing code from " + autostartFilename;
+                    RuntimeUnityEditorCore.Logger.Log(LogLevel.Info, message);
+                    AppendLogLine(message);
+                    foreach (var line in allLines)
+                        Evaluate(line);
+                }
+            }
         }
 
         public void DisplayWindow()
         {
+            if (!Show) return;
+
             if (_completionsListingStyle == null)
             {
                 _completionsListingStyle = new GUIStyle(GUI.skin.button)
@@ -82,8 +112,8 @@ namespace RuntimeUnityEditor.Core.REPL
                 };
             }
 
-            EditorUtilities.DrawSolidWindowBackground(_windowRect);
             _windowRect = GUILayout.Window(_windowId, _windowRect, WindowFunc, "C# REPL Console");
+            InterfaceMaker.EatInputInRect(_windowRect);
         }
 
         private GUIStyle _completionsListingStyle;
@@ -104,10 +134,11 @@ namespace RuntimeUnityEditor.Core.REPL
                         foreach (var suggestion in _suggestions)
                         {
                             _completionsListingStyle.normal.textColor = suggestion.GetTextColor();
-                            if (!GUILayout.Button(suggestion.Full, _completionsListingStyle, GUILayout.ExpandWidth(true)))
-                                continue;
-                            AcceptSuggestion(suggestion.Addition);
-                            break;
+                            if (GUILayout.Button(suggestion.Full, _completionsListingStyle, GUILayout.ExpandWidth(true)))
+                            {
+                                AcceptSuggestion(suggestion.Addition);
+                                break;
+                            }
                         }
                     }
                     else
@@ -120,7 +151,7 @@ namespace RuntimeUnityEditor.Core.REPL
                 GUILayout.BeginHorizontal();
                 {
                     GUI.SetNextControlName("replInput");
-                    _inputField = GUILayout.TextField(_inputField);
+                    _inputField = GUILayout.TextArea(_inputField);
 
                     if (_refocus)
                     {
@@ -141,10 +172,23 @@ namespace RuntimeUnityEditor.Core.REPL
 
                     if (GUILayout.Button("History", GUILayout.ExpandWidth(false)))
                     {
-                        _sb.AppendLine();
-                        _sb.AppendLine("# History of entered commands:");
+                        AppendLogLine("");
+                        AppendLogLine("# History of executed commands:");
                         foreach (var h in _history)
-                            _sb.AppendLine(h);
+                            AppendLogLine(h);
+
+                        ScrollToBottom();
+                    }
+
+                    if (GUILayout.Button("Autostart", GUILayout.ExpandWidth(false)))
+                    {
+                        AppendLogLine("Opening autostart file at " + _autostartFilename);
+
+                        if (!File.Exists(_autostartFilename))
+                            File.WriteAllText(_autostartFilename, "// This C# code will be executed by the REPL near the end of plugin initialization. Only single-line statements are supported. Use echo(string) to write to REPL log and message(string) to write to global log.\n\n");
+
+                        try { Process.Start(_autostartFilename); }
+                        catch (Exception e) { AppendLogLine(e.Message); }
 
                         ScrollToBottom();
                     }
@@ -163,12 +207,16 @@ namespace RuntimeUnityEditor.Core.REPL
 
         private void AcceptSuggestion(string suggestion)
         {
-            _inputField = _inputField.Insert(_textEditor.cursorIndex, suggestion);
+            int cursorIndex = _textEditor.cursorIndex;
+            _inputField = _inputField.Insert(cursorIndex, suggestion);
             _newCursorLocation = _textEditor.cursorIndex + suggestion.Length;
             ClearSuggestions();
+
+            _refocus = true;
+            _refocusCursorIndex = cursorIndex + suggestion.Length;
         }
 
-        private object Evaluate(string str)
+        public object Evaluate(string str)
         {
             object ret = VoidType.Value;
             _evaluator.Compile(str, out var compiled);
@@ -178,7 +226,7 @@ namespace RuntimeUnityEditor.Core.REPL
             }
             catch (Exception e)
             {
-                _sb.AppendLine(e.ToString());
+                AppendLogLine(e.ToString());
             }
 
             return ret;
@@ -186,6 +234,8 @@ namespace RuntimeUnityEditor.Core.REPL
 
         private void FetchHistory(int move)
         {
+            if (_history.Count == 0) return;
+
             _historyPosition += move;
             _historyPosition %= _history.Count;
             if (_historyPosition < 0)
@@ -200,7 +250,10 @@ namespace RuntimeUnityEditor.Core.REPL
             {
                 _suggestions.Clear();
 
+                // Discard errors when searching for completions
+                var logLen = _sb.Length;
                 var completions = _evaluator.GetCompletions(input, out string prefix);
+                _sb.Length = logLen;
                 if (completions != null)
                 {
                     if (prefix == null)
@@ -230,7 +283,7 @@ namespace RuntimeUnityEditor.Core.REPL
             if (trimmedInput.StartsWith("using"))
                 trimmedInput = trimmedInput.Remove(0, 5).Trim();
 
-            return _namespaces.Where(x => x.StartsWith(trimmedInput) && x.Length > trimmedInput.Length)
+            return Namespaces.Where(x => x.StartsWith(trimmedInput) && x.Length > trimmedInput.Length)
                 .Select(x => new Suggestion(x.Substring(trimmedInput.Length), x.Substring(0, trimmedInput.Length), SuggestionKind.Namespace));
         }
 
@@ -247,29 +300,40 @@ namespace RuntimeUnityEditor.Core.REPL
                 _newCursorLocation = -1;
             }
 
-            if (Event.current.isKey && Event.current.keyCode == KeyCode.Return)
-            {
-                AcceptInput();
-                Event.current.Use();
-            }
-
-            if (Event.current.isKey)
-            {
-                if (Event.current.keyCode == KeyCode.UpArrow)
-                {
-                    FetchHistory(-1);
-                    Event.current.Use();
-                    ClearSuggestions();
-                }
-                else if (Event.current.keyCode == KeyCode.DownArrow)
-                {
-                    FetchHistory(1);
-                    Event.current.Use();
-                    ClearSuggestions();
-                }
-            }
-
             var input = _inputField;
+
+            var currentEvent = Event.current;
+            if (currentEvent.isKey)
+            {
+                if (currentEvent.keyCode == KeyCode.Return || currentEvent.keyCode == KeyCode.KeypadEnter)
+                {
+                    if (!currentEvent.shift)
+                    {
+                        // Fix pressing enter adding a newline in textarea
+                        if (_textEditor.cursorIndex - 1 >= 0)
+                            _inputField = _inputField.Remove(_textEditor.cursorIndex - 1, 1);
+
+                        AcceptInput();
+                        currentEvent.Use();
+                    }
+                }
+                else if (input == null || !input.Contains('\n')) // todo change to always be alt + up/dn and have arrows for suggestions?
+                {
+                    if (currentEvent.keyCode == KeyCode.UpArrow)
+                    {
+                        FetchHistory(-1);
+                        currentEvent.Use();
+                        ClearSuggestions();
+                    }
+                    else if (currentEvent.keyCode == KeyCode.DownArrow)
+                    {
+                        FetchHistory(1);
+                        currentEvent.Use();
+                        ClearSuggestions();
+                    }
+                }
+            }
+
             if (!string.IsNullOrEmpty(input))
             {
                 try
@@ -308,6 +372,10 @@ namespace RuntimeUnityEditor.Core.REPL
 
         private void AcceptInput()
         {
+            _inputField = _inputField.Trim();
+
+            if (_inputField == "") return;
+
             _history.Add(_inputField);
             if (_history.Count > HistoryLimit)
                 _history.RemoveRange(0, _history.Count - HistoryLimit);
@@ -324,10 +392,10 @@ namespace RuntimeUnityEditor.Core.REPL
                 catch (SystemException) { }
             }
 
-            _sb.AppendLine($"> {_inputField}");
+            AppendLogLine($"> {_inputField}");
             var result = Evaluate(_inputField);
             if (result != null && !Equals(result, VoidType.Value))
-                _sb.AppendLine(result.ToString());
+                AppendLogLine(result.ToString());
 
             ScrollToBottom();
 
@@ -349,6 +417,11 @@ namespace RuntimeUnityEditor.Core.REPL
         public void UpdateWindowSize(Rect windowRect)
         {
             _windowRect = windowRect;
+        }
+
+        internal void AppendLogLine(string message)
+        {
+            _sb.AppendLine(message);
         }
     }
 }

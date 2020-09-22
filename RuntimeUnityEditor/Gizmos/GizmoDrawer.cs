@@ -13,6 +13,8 @@ namespace RuntimeUnityEditor.Core.Gizmos
         private readonly List<IGizmoEntry> _lines = new List<IGizmoEntry>();
         private bool _show;
 
+        public ICollection<IGizmoEntry> Lines => _lines;
+
         public GizmoDrawer(MonoBehaviour coroutineTarget)
         {
             coroutineTarget.StartCoroutine(EndOfFrame());
@@ -33,9 +35,10 @@ namespace RuntimeUnityEditor.Core.Gizmos
 
             GUILayout.BeginHorizontal(GUI.skin.box);
             {
-                ShowGizmos = GUILayout.Toggle(ShowGizmos, "Show gizmos for selection");
-                ShowGizmosOutsideEditor = GUILayout.Toggle(ShowGizmosOutsideEditor, "Always show");
+                GUILayout.Label("Gizmos");
                 GUILayout.FlexibleSpace();
+                ShowGizmos = GUILayout.Toggle(ShowGizmos, "Show selection");
+                ShowGizmosOutsideEditor = GUILayout.Toggle(ShowGizmosOutsideEditor, "When closed");
             }
             GUILayout.EndHorizontal();
         }
@@ -55,11 +58,12 @@ namespace RuntimeUnityEditor.Core.Gizmos
             _lines.Clear();
         }
 
+        private readonly WaitForEndOfFrame _waitForEndOfFrame = new WaitForEndOfFrame();
         private IEnumerator EndOfFrame()
         {
             while (true)
             {
-                yield return new WaitForEndOfFrame();
+                yield return _waitForEndOfFrame;
                 if (Show)
                 {
                     foreach (var x in _lines)

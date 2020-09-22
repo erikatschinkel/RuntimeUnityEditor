@@ -1,8 +1,8 @@
 # Runtime Unity Editor / Debugging Tools
-In-game inspector, editor and interactive console for applications made with Unity3D game engine. It's designed for debugging and modding Unity games, but can also be used as an universal trainer.
+In-game inspector, editor and interactive console for applications made with Unity3D game engine. It's designed for debugging and modding Unity games, but can also be used as a universal trainer.
 
 ### Features
-- Works on most Unity games supported by BepInEx
+- Works on most Unity games supported by [BepInEx](https://github.com/BepInEx/BepInEx)
 - GameObject and component browser
 - Object inspector that allows modifying values of objects in real time
 - REPL C# console
@@ -11,10 +11,10 @@ In-game inspector, editor and interactive console for applications made with Uni
 - IPC Named Pipes Server - Native Win32 API (Functional Foudation WIP - basic features)
 - Extended Debug dumps for Game AppDomain and Types (i.e. Dumping methods, properties, events, etc. for each type)
 
-![preview](https://user-images.githubusercontent.com/39247311/53586063-a8324000-3b87-11e9-8209-57e660d2949d.png)
-![preview](https://user-images.githubusercontent.com/39247311/49837301-2d3a6400-fda6-11e8-961a-9a85f1247705.PNG)
+![preview](https://user-images.githubusercontent.com/39247311/64476158-ce1a4c00-d18b-11e9-97d6-084452cdbf0a.PNG)
 
 ### How to use
+<<<<<<< HEAD
 - This is a BepInEx plugin. It requires BepInEx v4 or later. Grab it from [here](https://github.com/BepInEx/BepInEx
 ) and follow installation instructions.
 - Download the latest orignal builds from the [Releases](https://github.com/ManlyMarco/RuntimeUnityEditor/releases) page.
@@ -34,3 +34,25 @@ Note: If the plugin fails to load under BepInEx 4 with a type load exception, mo
 ### Credits:
 Special thanks to ManlyMarco for his hard work in developing the original project this fork is based on. You can still support his work
 through his Patreon page at: https://www.patreon.com/ManlyMarco
+=======
+1. Install BepInEx v4.x or v5.x if you don't have it already. You can download it [here](https://github.com/BepInEx/BepInEx
+).
+2. Download the latest build from the [Releases](https://github.com/ManlyMarco/RuntimeUnityEditor/releases) page. Make sure to get the correct version for your BepInEx.
+3. Extract the BepInEx folder from the archive directly into your game directory (you should already have a BepInEx folder there from previous step). Replace files if asked.
+4. To turn on press the F12 key when in-game. A window should appear on top of the game. If it doesn't appear, check logs for errors.
+
+Note: If the plugin fails to load under BepInEx 4 with a type load exception, move RuntimeUnityEditor.Core.dll to BepInEx/core folder.
+
+### How to build
+1. Get Visual Studio 2019 (recommended) or the latest version of Visual Studio 2017.
+2. Clone the repository recursively (`git clone --recursive https://github.com/ManlyMarco/RuntimeUnityEditor`). 
+3. Open the solution in Visual Studio and hit Build All.
+
+Notes:
+- If you already have the repository cloned or want to update the mcs submodule you need to run `git submodule update --init --recursive` on your local repository.
+- You have to reference UnityEngine.dll from Unity 5.x. The new UnityEngine.dll forwards all of the split types into their new respective dll files, therefore doing this allows runtime editor to run on any Unity version.
+
+---
+
+You can support development of my plugins through my Patreon page: https://www.patreon.com/ManlyMarco
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153

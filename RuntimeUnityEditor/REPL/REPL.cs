@@ -155,16 +155,16 @@ namespace RuntimeUnityEditor.Core.REPL
         public static void seti(object obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
-            RuntimeUnityEditorCore.Instance.Inspector.InspectorPush(new InstanceStackEntry(obj, "REPL > " + obj.GetType().Name));
+            RuntimeUnityEditorCore.Instance.Inspector.Push(new InstanceStackEntry(obj, "REPL > " + obj.GetType().Name), true);
         }
 
         [Documentation("setis(type) - send the static class to the inspector.")]
         public static void setis(Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-            RuntimeUnityEditorCore.Instance.Inspector.InspectorPush(new StaticStackEntry(type, "REPL > " + type.Name));
+            RuntimeUnityEditorCore.Instance.Inspector.Push(new StaticStackEntry(type, "REPL > " + type.Name), true);
         }
-        
+
         [Documentation("dnspy(type) - open the type in dnSpy if dnSpy path is configured.")]
         public static void dnspy(Type type)
         {
@@ -177,6 +177,18 @@ namespace RuntimeUnityEditor.Core.REPL
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
             DnSpyHelper.OpenInDnSpy(member);
+        }
+
+        [Documentation("echo(string) - write a string to REPL output.")]
+        public static void echo(string message)
+        {
+            RuntimeUnityEditorCore.Instance.Repl.AppendLogLine(message);
+        }
+
+        [Documentation("message(string) - write a string to log.")]
+        public static void message(string message)
+        {
+            RuntimeUnityEditorCore.Logger.Log(LogLevel.Message, message);
         }
 
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]

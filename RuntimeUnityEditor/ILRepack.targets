@@ -5,15 +5,19 @@
 
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)\$(AssemblyName)1.dll" />
+<<<<<<< HEAD
       <InputAssemblies Include="$(OutputPath)\mcs_custom.dll" />
       <InputAssemblies Include="$(OutputPath)\Newtonsoft.Json.dll" />
+=======
+      <InputAssemblies Include="$(OutputPath)\mcs.dll" />
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153
     </ItemGroup>
 
     <ILRepack
       Parallel="true"
       Internalize="true"
       DebugInfo="false"
-      LibraryPath="$(SolutionDir)Libs\"
+      LibraryPath="$(OutputPath)"
       InputAssemblies="@(InputAssemblies)"
       TargetKind="Dll"
       TargetPlatformVersion="v2"
@@ -21,5 +25,6 @@
     />
 
     <Delete Files="@(InputAssemblies)" />
+    <Delete Files="$(OutputPath)\UnityEngine.dll" />
   </Target>
 </Project>

@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\bin\BepInEx\plugins\RuntimeUnityEditor\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\bin\BepInEx\plugins\RuntimeUnityEditor\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -41,6 +41,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\..\Games\0-SMALL GAMES\Train Valley 2 Build 164\TrainValley2_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -75,12 +76,31 @@
     </Reference>
     <Reference Include="Vectrosity">
       <HintPath>..\libraries\Vectrosity.dll</HintPath>
+=======
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.XML" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IllusionLibs.HoneySelect.UnityEngine.5.3.5\lib\net35\UnityEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IllusionLibs.HoneySelect.UnityEngine.UI.5.3.5\lib\net35\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Vectrosity, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IllusionLibs.HoneySelect.Vectrosity.2017.6.30\lib\net35\Vectrosity.dll</HintPath>
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Debugging\DebugHelpers.cs" />
     <Compile Include="DnSpyHelper.cs" />
+    <Compile Include="Inspector\VariableFieldDrawer.cs" />
+    <Compile Include="Inspector\Inspector.InspectorTab.cs" />
+    <Compile Include="Utils\AssetBundleManagerHelper.cs" />
+    <Compile Include="ObjectTree\GameObjectSearcher.cs" />
     <Compile Include="Gizmos\IGizmoEntry.cs" />
     <Compile Include="Gizmos\RendererGizmo.cs" />
     <Compile Include="ILoggerWrapper.cs" />
@@ -90,6 +110,7 @@
     <Compile Include="Inspector\Entries\Inspector\StaticStackEntry.cs" />
     <Compile Include="Inspector\Inspector.cs" />
     <Compile Include="Inspector\Entries\Contents\CacheEntryBase.cs" />
+    <Compile Include="Inspector\InspectorHelpObject.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="Gizmos\GizmoDrawer.cs" />
     <Compile Include="Networking\IPCServer\IPCKillClient.cs" />
@@ -108,18 +129,24 @@
     <Compile Include="REPL\REPLWindow.cs" />
     <Compile Include="RuntimeUnityEditorCore.cs" />
     <Compile Include="Utils\BoundsUtils.cs" />
+    <Compile Include="Utils\IMGUIUtils.cs" />
+    <Compile Include="Utils\MouseInspect.cs" />
+    <Compile Include="Utils\ComboBox.cs" />
+    <Compile Include="Utils\TomlTypeConverter.cs" />
     <Compile Include="Utils\EditorUtilities.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Inspector\Entries\Contents\FieldCacheEntry.cs" />
     <Compile Include="Inspector\Entries\Contents\ICacheEntry.cs" />
-    <Compile Include="Inspector\InspectorHelpObj.cs" />
     <Compile Include="Inspector\Entries\Inspector\InspectorStackEntryBase.cs" />
     <Compile Include="Inspector\Entries\Contents\ListCacheEntry.cs" />
     <Compile Include="Inspector\Entries\Contents\MethodCacheEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Inspector\Entries\Contents\PropertyCacheEntry.cs" />
     <Compile Include="Inspector\Entries\Contents\ReadonlyCacheEntry.cs" />
+    <Compile Include="UI\InterfaceMaker.cs" />
+    <Compile Include="Utils\ResourceUtils.cs" />
     <Compile Include="Utils\SceneDumper.cs" />
+    <Compile Include="Inspector\ToStringConverter.cs" />
     <Compile Include="Utils\TypeNameExtensions.cs" />
     <Compile Include="Utils\UnityFeatureHelperNew.cs" />
   </ItemGroup>
@@ -128,9 +155,19 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ProjectReference Include="..\RemotingShared\RemotingShared.csproj">
       <Project>{ce031df1-3e64-4125-8ab5-cea6993440cd}</Project>
       <Name>RemotingShared</Name>
+=======
+    <EmbeddedResource Include="UI\guisharp-box.png" />
+    <EmbeddedResource Include="UI\guisharp-window.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\modules\mcs\mcs\mcs.csproj">
+      <Project>{e4989e4c-0875-4528-9031-08e2c0e70103}</Project>
+      <Name>mcs</Name>
+>>>>>>> 0a9dab7beaa6ec526af4511ff4165769e0ca9153
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

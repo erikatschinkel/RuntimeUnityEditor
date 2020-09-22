@@ -2,14 +2,14 @@
 
 namespace RuntimeUnityEditor.Core.Inspector
 {
-    internal class InspectorHelpObj
+    internal class InspectorHelpObject
     {
-        private InspectorHelpObj()
+        private InspectorHelpObject()
         { }
 
         public static InspectorStackEntryBase Create()
         {
-            var obj = new InspectorHelpObj();
+            var obj = new InspectorHelpObject();
             return new InstanceStackEntry(obj, "Inspector Help");
         }
 
@@ -36,6 +36,10 @@ namespace RuntimeUnityEditor.Core.Inspector
         public string Help8 = "'IS ENUMERABLE' means that opening the member will give you anywhere from 0 to infinitely many values. They might even be generated as you view them. " +
                               "If the number of values is known, it will be displayed instead of this text.";
 
+        public string Help9 = "If REPL is supported (the C# command prompt), you can pull and push object to and from inspector by using the 'geti()' and 'set(obj)' commands. Type 'help' in REPL for more info.";
+
         public static string HelpS = "If a member name has an S/ in front of it, it means that this is a static member. It will be the same in all instances of an object.";
+
+        public string HelpTabs = "Right click on any member to open it in a tab. Right click a tab to close it.";
     }
 }

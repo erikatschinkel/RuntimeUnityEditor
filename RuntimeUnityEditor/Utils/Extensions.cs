@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RuntimeUnityEditor.Core.Inspector.Entries;
 using UnityEngine;
@@ -106,6 +108,47 @@ namespace RuntimeUnityEditor.Core.Utils
                         throw new Exception("Cannot open items of type " + centry.GetType().FullName);
                     return null;
             }
+        }
+
+        public static IEnumerable<Type> GetTypesSafe(this Assembly ass)
+        {
+            try { return ass.GetTypes(); }
+            catch (ReflectionTypeLoadException e) { return e.Types.Where(x => x != null); }
+            catch { return Enumerable.Empty<Type>(); }
+        }
+
+        public static string GetFullTransfromPath(this Transform target)
+        {
+            var name = target.name;
+            var parent = target.parent;
+            while (parent != null)
+            {
+                name = $"{parent.name}/{name}";
+                parent = parent.parent;
+            }
+            return name;
+        }
+
+        internal static string IsNullOrDestroyed(this object value)
+        {
+            if (ReferenceEquals(value, null)) return "NULL";
+
+            if (value is UnityEngine.Object uobj)
+            {
+                // This is necessary because the is operator ignores the == override that makes Objects look like null
+                if (uobj.Equals(null)) return "NULL (Destroyed)";
+            }
+
+            return null;
+        }
+        
+        public static void FillTexture(this Texture2D tex, Color color)
+        {
+            for (var x = 0; x < tex.width; x++)
+            for (var y = 0; y < tex.height; y++)
+                tex.SetPixel(x, y, color);
+
+            tex.Apply(false);
         }
     }
 }
